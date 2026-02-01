@@ -1,9 +1,9 @@
 ## TEAM LEAD : Nikhil Sharma
 
 ## TEAM MEMBBERS : 
-### Sumesh SIngh
-### Roshan Singh
-### prathamesh Yandolli
+### Pavan Purohit
+### Nimisha Tamore
+### Disha Raut
 
 # EcoFinds - Sustainable Marketplace Platform
 
