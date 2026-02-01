@@ -1,6 +1,6 @@
-## TEAM LEAD : Nikhil Sharma
+## TEAM LEAD : Pavan Purohit
 
-## TEAM MEMBBERS : 
+## TEAM MEMBERS : 
 ### Pavan Purohit
 ### Nimisha Tamore
 ### Disha Raut
