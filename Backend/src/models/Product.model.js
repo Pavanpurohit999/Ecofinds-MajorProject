@@ -171,6 +171,7 @@ ProductSchema.index({ "location.lat": 1, "location.lng": 1 });
 ProductSchema.index({ createdAt: -1 });
 ProductSchema.index({ soldCount: -1 });
 ProductSchema.index({ viewCount: -1 });
+ProductSchema.index({ productCategory: 1, price: 1 });
 
 // Text search index
 ProductSchema.index({
@@ -207,4 +208,8 @@ ProductSchema.methods.isAvailable = function () {
   return this.isActive && this.quantity > 0;
 };
 
-module.exports = mongoose.model("Product", ProductSchema);
+if (!mongoose.models.Product) {
+  console.log("Registering Product model for the first time");
+}
+module.exports =
+  mongoose.models.Product || mongoose.model("Product", ProductSchema);

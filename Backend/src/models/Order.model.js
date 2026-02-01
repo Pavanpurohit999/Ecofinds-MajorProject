@@ -288,8 +288,9 @@ OrderSchema.pre("save", function (next) {
 OrderSchema.index({ buyerId: 1, status: 1, createdAt: -1 });
 OrderSchema.index({ sellerId: 1, status: 1, createdAt: -1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
-OrderSchema.index({ exchangeCode: 1 });
 OrderSchema.index({ listingId: 1, status: 1 });
 OrderSchema.index({ isReviewable: 1, reviewId: 1 });
+OrderSchema.index({ "items.productId": 1 });
+OrderSchema.index({ userId: 1, createdAt: -1 });
 
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.models.Order || mongoose.model("Order", OrderSchema);

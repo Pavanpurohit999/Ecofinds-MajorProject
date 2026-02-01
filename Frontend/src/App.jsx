@@ -18,6 +18,7 @@ import CartPage from "./pages/CartPage";
 import AddItemPage from "./pages/AddItemPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 
+
 // Scroll to top component
 const ScrollToTop = () => {
   const { pathname } = useLocation();

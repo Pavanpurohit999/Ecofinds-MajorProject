@@ -1,4 +1,3 @@
-
 import apiClient from "../api/axios";
 
 // Auth API endpoints
@@ -15,7 +14,7 @@ const authAPI = {
   verifyEmailOTP: async (verificationData) => {
     // verificationData contains: { email, otp, username, password, name, fullname }
     const response = await apiClient.post(
-      "/users/verify-email-otp",
+      "/users/verify-otp",
       verificationData
     );
     return response.data;

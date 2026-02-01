@@ -67,7 +67,7 @@ router.patch(
 
 // OTP Routes for Email Verification (Signup)
 router.post("/send-verification-otp", sendEmailVerificationOTP); // Send OTP for email verification
-router.post("/verify-email-otp", verifyEmailOTP); // Verify email OTP
+router.post("/verify-otp", verifyEmailOTP); // Verify email OTP
 router.post("/resend-verification-otp", resendEmailVerificationOTP); // Resend email verification OTP
 
 // Debug route to check for conflicting users

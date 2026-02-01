@@ -1,30 +1,30 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 // Create transporter for email service
 const createTransporter = () => {
-    const config = {
-        service: 'gmail',
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    };
-    
-    console.log('Creating transporter with config:', {
-        service: config.service,
-        host: config.host,
-        port: config.port,
-        user: config.auth.user,
-        passSet: !!config.auth.pass
-    });
-    
-    return nodemailer.createTransport(config);
+  const config = {
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  };
+
+  console.log("Creating transporter with config:", {
+    service: config.service,
+    host: config.host,
+    port: config.port,
+    user: config.auth.user,
+    passSet: !!config.auth.pass,
+  });
+
+  return nodemailer.createTransport(config);
 };
 
 /**
@@ -34,24 +34,24 @@ const createTransporter = () => {
  * @param {string} username - User's username
  * @returns {Promise} Email send result
  */
-const sendSignupOTP = async (email, otp, username = 'User') => {
-    try {
-        console.log('Starting email send process...');
-        console.log('Email config:', {
-            service: 'gmail',
-            user: process.env.EMAIL_USER,
-            passLength: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0
-        });
-        
-        const transporter = createTransporter();
-        
-        console.log('Transporter created successfully');
-        
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Email Verification - Complete Your Registration',
-            html: `
+const sendSignupOTP = async (email, otp, username = "User") => {
+  try {
+    console.log("Starting email send process...");
+    console.log("Email config:", {
+      service: "gmail",
+      user: process.env.EMAIL_USER,
+      passLength: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
+    });
+
+    const transporter = createTransporter();
+
+    console.log("Transporter created successfully");
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Email Verification - Complete Your Registration",
+      html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center;">
                         <h1 style="color: white; margin: 0; font-size: 28px;">Welcome!</h1>
@@ -88,26 +88,25 @@ const sendSignupOTP = async (email, otp, username = 'User') => {
                         <p>© 2025 Your Platform. All rights reserved.</p>
                     </div>
                 </div>
-            `
-        };
-        
-        console.log('Mail options prepared, attempting to send...');
-        console.log('Sending to:', email);
-        
-        const result = await transporter.sendMail(mailOptions);
-        console.log('Signup OTP email sent successfully:', result.messageId);
-        return result;
-        
-    } catch (error) {
-        console.error('Email send error details:', {
-            message: error.message,
-            code: error.code,
-            command: error.command,
-            response: error.response,
-            responseCode: error.responseCode
-        });
-        throw new Error(`Failed to send email: ${error.message}`);
-    }
+            `,
+    };
+
+    console.log("Mail options prepared, attempting to send...");
+    console.log("Sending to:", email);
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log("Signup OTP email sent successfully:", result.messageId);
+    return result;
+  } catch (error) {
+    console.error("Email send error details:", {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+    });
+    throw new Error(`Failed to send email: ${error.message}`);
+  }
 };
 
 /**
@@ -117,15 +116,15 @@ const sendSignupOTP = async (email, otp, username = 'User') => {
  * @param {string} username - User's username
  * @returns {Promise} Email send result
  */
-const sendSigninOTPEmail = async (email, otp, username = 'User') => {
-    try {
-        const transporter = createTransporter();
-        
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Sign In Verification Code',
-            html: `
+const sendSigninOTPEmail = async (email, otp, username = "User") => {
+  try {
+    const transporter = createTransporter();
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Sign In Verification Code",
+      html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
                     <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 30px; border-radius: 10px; text-align: center;">
                         <h1 style="color: white; margin: 0; font-size: 28px;">Sign In Request</h1>
@@ -161,20 +160,19 @@ const sendSigninOTPEmail = async (email, otp, username = 'User') => {
                         <p>© 2025 Your Platform. All rights reserved.</p>
                     </div>
                 </div>
-            `
-        };
-        
-        const result = await transporter.sendMail(mailOptions);
-        console.log('Signin OTP email sent successfully:', result.messageId);
-        return result;
-        
-    } catch (error) {
-        console.error('Error sending signin OTP email:', error);
-        throw error;
-    }
+            `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log("Signin OTP email sent successfully:", result.messageId);
+    return result;
+  } catch (error) {
+    console.error("Error sending signin OTP email:", error);
+    throw error;
+  }
 };
 
 module.exports = {
-    sendSignupOTP,
-    sendSigninOTPEmail
+  sendSignupOTP,
+  sendSigninOTPEmail,
 };

@@ -6,9 +6,8 @@ const USE_LOCAL_SERVER = import.meta.env.VITE_USE_LOCAL_SERVER === "true"; // Ch
 
 // Base URL for your backend API
 const BASE_URL = USE_LOCAL_SERVER
-  ? import.meta.env.VITE_LOCAL_API_URL || "http://localhost:5001/api" // Fixed: Changed from 8000 to 5001
-  : import.meta.env.VITE_HOSTED_API_URL ||
-    "https://vendorverse-uzqz.onrender.com/api"; // Hosted production server
+  ? import.meta.env.VITE_API_BASE_URL
+  : "http://localhost:5000/api"; // Fixed: Changed from 8000 to 5001
 
 console.log("🌐 API Base URL:", BASE_URL);
 console.log("🔧 Using Local Server:", USE_LOCAL_SERVER);

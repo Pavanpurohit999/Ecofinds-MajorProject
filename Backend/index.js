@@ -7,7 +7,7 @@ const fileUpload = require("express-fileupload");
 const socketIo = require("socket.io");
 const rateLimit = require("express-rate-limit");
 const http = require("http");
-
+const razorpayWebhookRouter = require("./src/routes/razorpayWebhook.route.js");
 // Load environment variables from .env file
 dotenv.config();
 
@@ -44,7 +44,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://localhost:5001",
+      "http://localhost:5000",
       "https://cc5wnhxq-5001.inc1.devtunnels.ms",
       "https://cc5wnhxq-5173.inc1.devtunnels.ms",
       "https://vendorverse-uzqz.onrender.com",
@@ -77,6 +77,9 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 // app.options('*', Cors()); // Enable pre-flight for all routes
+
+// Must come BEFORE express.json() to read raw body correctly
+app.use("/api/razorpay/webhook", razorpayWebhookRouter);
 
 // Middleware to parse JSON
 app.use(express.json({ limit: "10mb" })); // This is a built-in middleware function in Express. It parses incoming requests with JSON payloads and is based on body-parser.
@@ -117,20 +120,21 @@ app.use(
 ); // This is a third-party middleware function in Express. It parses file uploads and is based on express-fileupload.
 
 // Import routes
-const userRouter = require("./src/routes/user.route");
-const supplierListingRouter = require("./src/routes/SupplierListing.route");
-const sampleRouter = require("./src/routes/sample.route");
-const analyticsRouter = require("./src/routes/analytics.route");
-const userProfileRouter = require("./src/routes/userProfile.route");
-const orderRouter = require("./src/routes/order.route");
-const reviewRouter = require("./src/routes/review.route");
-const materialRequestRouter = require("./src/routes/materialRequest.route");
-const notificationRouter = require("./src/routes/notification.route");
-const negotiationRouter = require("./src/routes/negotiation.route");
-const orderChatRouter = require("./src/routes/orderChat.route");
-const productRouter = require("./src/routes/product.route");
-const cartRouter = require("./src/routes/cart.route");
-const paymentRouter = require("./src/routes/payment.route");
+const userRouter = require("./src/routes/user.route.js");
+const supplierListingRouter = require("./src/routes/SupplierListing.route.js");
+const sampleRouter = require("./src/routes/sample.route.js");
+const analyticsRouter = require("./src/routes/analytics.route.js");
+const userProfileRouter = require("./src/routes/userProfile.route.js");
+const orderRouter = require("./src/routes/order.route.js");
+const reviewRouter = require("./src/routes/review.route.js");
+const materialRequestRouter = require("./src/routes/materialRequest.route.js");
+const notificationRouter = require("./src/routes/notification.route.js");
+const negotiationRouter = require("./src/routes/negotiation.route.js");
+const orderChatRouter = require("./src/routes/orderChat.route.js");
+const productRouter = require("./src/routes/product.route.js");
+const cartRouter = require("./src/routes/cart.route.js");
+const paymentRouter = require("./src/routes/payment.route.js");
+const recommendationRouter = require("./src/routes/recommendation.route.js");
 
 // Import controllers and socket handlers
 const locationChatSocket = require("./src/locationChatSocket.js");
@@ -138,7 +142,7 @@ const orderChatSocket = require("./src/orderChatSocket.js");
 const NotificationSocketHandler = require("./src/utils/notificationSocket.js");
 const notificationService = require("./src/utils/notificationService.js");
 const groupchatroute = require("./src/routes/groupchat.route.js");
-const searchRouter = require("./src/routes/search.route");
+const searchRouter = require("./src/routes/search.route.js");
 
 // chat route
 app.use("/api/", limiter);
@@ -161,6 +165,7 @@ app.use("/api/material-requests", materialRequestRouter); // Mount the material 
 app.use("/api/notifications", notificationRouter); // Mount the notification router
 app.use("/api/negotiations", negotiationRouter); // Mount the negotiation router
 app.use("/api/order-chat", orderChatRouter); // Mount the order chat router
+app.use("/api/recommendations", recommendationRouter); // Mount the recommendation router
 
 // private chat
 // app.use('/api/chat', chatRoutes); // chating route
@@ -255,7 +260,7 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-const PORT = 5001;
+const PORT = 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

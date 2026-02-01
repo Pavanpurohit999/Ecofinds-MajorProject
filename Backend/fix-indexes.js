@@ -4,7 +4,7 @@ require("dotenv").config();
 async function fixIndexes() {
   try {
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected successfully!");
 
     const db = mongoose.connection.db;

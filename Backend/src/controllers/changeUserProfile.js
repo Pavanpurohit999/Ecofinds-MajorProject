@@ -40,9 +40,9 @@ const getCurrentUser = asynchandler(async (req, res) => {
 });
 
 const updateAccountDetails = asynchandler(async (req, res) => {
-  const { username, fullname, name, phone } = req.body;
+  const { username, fullname, name, phone, address } = req.body;
 
-  if (!username && !fullname && !name && !phone) {
+  if (!username && !fullname && !name && !phone && !address) {
     throw new apiError(400, "Please provide at least one field to update");
   }
 
@@ -53,6 +53,31 @@ const updateAccountDetails = asynchandler(async (req, res) => {
   if (name) updateFields.name = name;
   if (phone) updateFields.phone = phone;
 
+  // Ensure user.address exists
+  const currentAddress = req.user.address || {};
+
+  // Merge existing address with new updates
+  if (address && typeof address === "object") {
+    const { street, city, state, pincode } = address;
+    updateFields.address = {
+      street: street || currentAddress.street || "To be updated",
+      city: city || currentAddress.city || "To be updated",
+      state: state || currentAddress.state || "To be updated",
+      pincode: pincode || currentAddress.pincode || "000000",
+      geolocation: currentAddress.geolocation || { lat: 0, lng: 0 },
+    };
+  } else {
+    // No new address provided, keep existing or set defaults
+    updateFields.address = {
+      street: currentAddress.street || "To be updated",
+      city: currentAddress.city || "To be updated",
+      state: currentAddress.state || "To be updated",
+      pincode: currentAddress.pincode || "000000",
+      geolocation: currentAddress.geolocation || { lat: 0, lng: 0 },
+    };
+  }
+
+  // Update user
   const user = await UserSchema.findByIdAndUpdate(req.user._id, updateFields, {
     new: true,
   }).select("-password -refresh_token");
