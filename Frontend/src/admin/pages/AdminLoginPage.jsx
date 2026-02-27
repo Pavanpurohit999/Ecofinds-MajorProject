@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import {
+    FiLock,
+    FiMail,
+    FiEye,
+    FiEyeOff,
+    FiShield,
+    FiArrowRight,
+    FiAlertCircle,
+} from "react-icons/fi";
 
+import { FaLeaf } from "react-icons/fa";
 export default function AdminLoginPage() {
     const { adminLogin } = useAdminAuth();
     const navigate = useNavigate();
@@ -26,71 +36,75 @@ export default function AdminLoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0f1f0f 0%, #1a3a1a 50%, #0d2b1a 100%)" }}>
-            {/* Animated background blobs */}
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 font-sans antialiased relative overflow-hidden">
+            {/* High-end ambient background with blur effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-20" style={{ background: "radial-gradient(circle, #4ade80, transparent)" }} />
-                <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-20" style={{ background: "radial-gradient(circle, #f97316, transparent)" }} />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-5" style={{ background: "radial-gradient(circle, #86efac, transparent)" }} />
+                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-emerald-500/10 blur-[120px]" />
+                <div className="absolute bottom-[0%] right-[0%] w-[30%] h-[30%] rounded-full bg-indigo-500/10 blur-[120px]" />
             </div>
 
-            <div className="relative w-full max-w-md mx-4">
-                {/* Logo block */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg" style={{ background: "linear-gradient(135deg, #16a34a, #15803d)" }}>
-                        <span className="text-3xl">🌿</span>
+            <div className="relative w-full max-w-md mx-6 animate-in fade-in zoom-in duration-700">
+                {/* Brand Identity */}
+                <div className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] mb-6 shadow-2xl shadow-emerald-500/20 bg-gradient-to-br from-emerald-400 to-emerald-600 border border-emerald-400/20">
+                        <FaLeaf className="text-white text-3xl" />
                     </div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">EcoFinds</h1>
-                    <p className="text-green-400 text-sm mt-1 font-medium tracking-widest uppercase">Admin Portal</p>
+                    <h1 className="text-4xl font-black text-white tracking-tighter">EcoFinds</h1>
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">Guardian Control Plane</p>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    </div>
                 </div>
 
-                {/* Card */}
-                <div className="rounded-2xl p-8 shadow-2xl" style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                    <h2 className="text-xl font-semibold text-white mb-2">Welcome back</h2>
-                    <p className="text-gray-400 text-sm mb-8">Sign in to access the admin dashboard</p>
+                {/* Login Terminal */}
+                <div className="rounded-[2.5rem] p-10 bg-white/5 backdrop-blur-2xl border border-white/10 shadow-3xl">
+                    <div className="mb-10">
+                        <h2 className="text-2xl font-black text-white tracking-tight">System Access</h2>
+                        <p className="text-slate-400 text-sm font-medium mt-1">Authenticate to bypass the firewall</p>
+                    </div>
 
                     {error && (
-                        <div className="mb-6 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", color: "#fca5a5" }}>
-                            <span>⚠️</span> {error}
+                        <div className="mb-8 px-5 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-bold flex items-center gap-3 animate-in slide-in-from-top-2">
+                            <FiAlertCircle className="flex-shrink-0 text-lg" />
+                            <span>{error}</span>
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                placeholder="admin@ecofinds.com"
-                                className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 text-sm outline-none transition-all duration-200"
-                                style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-                                onFocus={(e) => (e.target.style.borderColor = "#4ade80")}
-                                onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
-                            />
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Terminal ID</label>
+                            <div className="relative group">
+                                <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    placeholder="admin@ecofinds.com"
+                                    className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 text-sm font-semibold outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                            <div className="relative">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Key</label>
+                            <div className="relative group">
+                                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     placeholder="••••••••"
-                                    className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 text-sm outline-none transition-all duration-200 pr-12"
-                                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-                                    onFocus={(e) => (e.target.style.borderColor = "#4ade80")}
-                                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+                                    className="w-full pl-12 pr-12 py-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white placeholder-slate-600 text-sm font-semibold outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 transition-all"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword((p) => !p)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
                                 >
-                                    {showPassword ? "🙈" : "👁️"}
+                                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
                                 </button>
                             </div>
                         </div>
@@ -98,23 +112,31 @@ export default function AdminLoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all duration-200 mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
-                            style={{ background: loading ? "#166534" : "linear-gradient(135deg, #16a34a, #15803d)", boxShadow: "0 4px 15px rgba(22,163,74,0.4)" }}
+                            className="w-full group relative flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white rounded-2xl font-black text-sm tracking-widest shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                         >
                             {loading ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Signing in...
-                                </>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span>Syncing...</span>
+                                </div>
                             ) : (
-                                "Sign In to Dashboard"
+                                <>
+                                    <span>Initialise Session</span>
+                                    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                </>
                             )}
                         </button>
                     </form>
 
-                    <p className="text-center text-xs text-gray-500 mt-6">
-                        🔒 Secured admin access • EcoFinds Platform
-                    </p>
+                    <div className="mt-10 pt-10 border-t border-white/5 flex items-center justify-center gap-2">
+                        <FiShield className="text-emerald-500/50" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AES-256 Bit Encrypted</span>
+                    </div>
+                </div>
+
+                {/* Version Control Tag */}
+                <div className="mt-8 text-center">
+                    <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Build 2.4.0 • EcoFinds Core</p>
                 </div>
             </div>
         </div>

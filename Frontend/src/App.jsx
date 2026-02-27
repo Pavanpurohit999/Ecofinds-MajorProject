@@ -21,7 +21,11 @@ import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import EnvironmentPage from "./pages/EnvironmentPage";
 import AdminLoginPage from "./admin/pages/AdminLoginPage";
 import AdminLayout from "./admin/pages/AdminLayout";
+import ChatPage from "./pages/ChatPage";
 
+import { SocketProvider } from "./context/SocketContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import { ChatProvider } from "./context/ChatContext";
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -120,41 +124,54 @@ function App() {
     <ErrorBoundary>
       <AdminAuthProvider>
         <AuthProvider>
-          <CartProvider>
-            <Router>
-              <ScrollToTop />
-              <Routes>
-                {/* Public Routes - No authentication required */}
-                <Route path="/authpage" element={<AuthPage />} />
-                <Route path='/' element={<LandingPage />} />
-                <Route path="/products" element={<AllProductsPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/environment" element={<EnvironmentPage />} />
+          <SocketProvider>
+            <NotificationProvider>
+              <ChatProvider>
+                <CartProvider>
+                  <Router>
+                    <ScrollToTop />
+                    <Routes>
+                      {/* Public Routes - No authentication required */}
+                      <Route path="/authpage" element={<AuthPage />} />
+                      <Route path='/' element={<LandingPage />} />
+                      <Route path="/products" element={<AllProductsPage />} />
+                      <Route path="/product/:id" element={<ProductDetailPage />} />
+                      <Route path="/search" element={<SearchResults />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/environment" element={<EnvironmentPage />} />
 
-                {/* Protected Routes - Authentication required */}
-                <Route path="/add-item" element={
-                  <ProtectedRoute>
-                    <AddItemPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/dashboard/*" element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                } />
+                      <Route path="/environment" element={<EnvironmentPage />} />
 
-                {/* Admin Routes - Uses AdminAuthContext, completely separate from user auth */}
-                <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route path="/admin/*" element={
-                  <AdminProtectedRoute>
-                    <AdminLayout />
-                  </AdminProtectedRoute>
-                } />
-              </Routes>
-            </Router>
-          </CartProvider>
+                      {/* Protected Routes - Authentication required */}
+                      <Route path="/chat" element={
+                        <ProtectedRoute>
+                          <ChatPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/add-item" element={
+                        <ProtectedRoute>
+                          <AddItemPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/dashboard/*" element={
+                        <ProtectedRoute>
+                          <DashboardLayout />
+                        </ProtectedRoute>
+                      } />
+
+                      {/* Admin Routes - Uses AdminAuthContext, completely separate from user auth */}
+                      <Route path="/admin/login" element={<AdminLoginPage />} />
+                      <Route path="/admin/*" element={
+                        <AdminProtectedRoute>
+                          <AdminLayout />
+                        </AdminProtectedRoute>
+                      } />
+                    </Routes>
+                  </Router>
+                </CartProvider>
+              </ChatProvider>
+            </NotificationProvider>
+          </SocketProvider>
         </AuthProvider>
       </AdminAuthProvider>
     </ErrorBoundary>

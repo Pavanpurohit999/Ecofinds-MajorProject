@@ -1,21 +1,27 @@
-// const express = require("express");
-// const {
-//   accessChat,
-//   fetchChats,
-//   createGroupChat,
-//   removeFromGroup,
-//   addToGroup,
-//   renameGroup,
-// } = require("../controllers/chatControllers");
-// const { protect } = require("../middleware/authMiddleware");
+const express = require("express");
+const {
+    accessChat,
+    fetchChats,
+    createGroupChat,
+    renameGroup,
+    addToGroup,
+    removeFromGroup,
+    allMessages,
+    sendMessage
+} = require("../controllers/chat.controller.js");
+const authMiddleware = require("../middlewares/auth.middleware.js");
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.route("/").post(protect, accessChat);
-// router.route("/").get(protect, fetchChats);
-// router.route("/group").post(protect, createGroupChat);
-// router.route("/rename").put(protect, renameGroup);
-// router.route("/groupremove").put(protect, removeFromGroup);
-// router.route("/groupadd").put(protect, addToGroup);
+router.route("/").post(authMiddleware, accessChat);
+router.route("/").get(authMiddleware, fetchChats);
+router.route("/group").post(authMiddleware, createGroupChat);
+router.route("/rename").put(authMiddleware, renameGroup);
+router.route("/add").put(authMiddleware, addToGroup);
+router.route("/remove").put(authMiddleware, removeFromGroup);
 
-// module.exports = router;
+// I will re-route messages here to match standard REST patterns
+router.route("/messages/:chatId").get(authMiddleware, allMessages);
+router.route("/messages").post(authMiddleware, sendMessage);
+
+module.exports = router;

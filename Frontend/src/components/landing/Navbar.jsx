@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../hooks/useCart';
 import { searchItems, getSearchSuggestions } from '../../services/searchService';
+import NotificationDropdown from '../notifications/NotificationDropdown';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -205,6 +206,18 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+            {isAuthenticated && (
+              <NotificationDropdown />
+            )}
+            {isAuthenticated && (
+              <button
+                onClick={() => navigate('/chat')}
+                className="!cursor-pointer flex items-center text-gray-700 hover:text-[#782355] transition-colors duration-200"
+              >
+                <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                <span>Chat</span>
+              </button>
+            )}
             <button
               onClick={() => navigate('/dashboard')}
               className="!cursor-pointer flex items-center text-gray-700 hover:text-[#782355] transition-colors duration-200"
@@ -311,6 +324,21 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+            {isAuthenticated && (
+              <div className="flex items-center w-full px-3 py-2 text-gray-700">
+                <NotificationDropdown />
+                <span className="ml-3 font-medium">Notifications</span>
+              </div>
+            )}
+            {isAuthenticated && (
+              <button
+                onClick={() => navigate('/chat')}
+                className="flex items-center w-full px-3 py-2 text-gray-700 hover:text-[#782355] hover:bg-gray-50 rounded-md transition-colors duration-200"
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                Chat
+              </button>
+            )}
             <button
               onClick={() => navigate('/dashboard')}
               className="flex items-center w-full px-3 py-2 text-gray-700 hover:text-[#782355] hover:bg-gray-50 rounded-md transition-colors duration-200"

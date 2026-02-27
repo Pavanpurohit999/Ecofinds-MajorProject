@@ -11,9 +11,11 @@ import {
   TruckIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
 
 const OrdersReceived = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -223,8 +225,8 @@ const OrdersReceived = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
-                      ? 'border-[#782355] text-[#782355]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-[#782355] text-[#782355]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
                 >
                   {tab.label} ({tab.count})
@@ -318,7 +320,10 @@ const OrdersReceived = () => {
                   )}
 
                   {order.status === 'completed' && (
-                    <button className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    <button
+                      onClick={() => navigate(`/chat?userId=${order.buyerId?._id || order.buyerId}`)}
+                      className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
                       <ChatBubbleLeftRightIcon className="h-4 w-4" />
                       Chat
                     </button>

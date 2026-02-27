@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   ChatBubbleLeftRightIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
 
 const OrdersPlaced = () => {
@@ -11,15 +12,17 @@ const OrdersPlaced = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+
   // Fetch orders when component mounts or tab changes
   useEffect(() => {
     const fetchOrdersData = async () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await orderService.getBuyerOrderHistory(1, 20, activeTab === 'all' ? '' : activeTab);
-        
+
         if (response.success) {
           setOrders(response.data.orders || []);
         } else {
@@ -40,9 +43,9 @@ const OrdersPlaced = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await orderService.getBuyerOrderHistory(1, 20, activeTab === 'all' ? '' : activeTab);
-      
+
       if (response.success) {
         setOrders(response.data.orders || []);
       } else {
@@ -59,7 +62,7 @@ const OrdersPlaced = () => {
   const handleCancelOrder = async (orderId) => {
     try {
       const response = await orderService.cancelOrder(orderId, 'User requested cancellation');
-      
+
       if (response.success) {
         // Refresh orders after cancellation
         fetchOrders();
@@ -127,11 +130,10 @@ const OrdersPlaced = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
-                    activeTab === tab.id
+                  className={`py - 4 px - 1 border - b - 2 font - medium text - sm whitespace - nowrap transition - colors duration - 200 ${activeTab === tab.id
                       ? 'border-[#782355] text-[#782355]'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    } `}
                 >
                   {tab.label} ({tab.count})
                 </button>
@@ -163,7 +165,7 @@ const OrdersPlaced = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading orders</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <button 
+            <button
               onClick={fetchOrders}
               className="bg-[#782355] text-white px-6 py-3 rounded-lg hover:bg-[#8e2a63] transition-colors duration-200"
             >
@@ -183,7 +185,7 @@ const OrdersPlaced = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-4">
                         <h3 className="text-xl font-bold text-gray-900">{order.itemName || 'Unknown Item'}</h3>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                        <span className={`inline - flex items - center px - 3 py - 1 rounded - full text - sm font - medium ${getStatusColor(order.status)} `}>
                           {getStatusIcon(order.status)} {order.status}
                         </span>
                       </div>
@@ -245,14 +247,17 @@ const OrdersPlaced = () => {
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-3 lg:min-w-[160px]">
                       {order.status === 'completed' && (
-                        <button className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        <button
+                          onClick={() => navigate(`/ chat ? userId = ${order.sellerId?._id || order.sellerId} `)}
+                          className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                        >
                           <ChatBubbleLeftRightIcon className="h-5 w-5" />
                           Chat
                         </button>
                       )}
-                      
+
                       {order.status === 'pending' && (
-                        <button 
+                        <button
                           onClick={() => handleCancelOrder(order._id)}
                           className="flex items-center justify-center gap-2 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200"
                         >
@@ -272,13 +277,13 @@ const OrdersPlaced = () => {
                       <span>{order.status}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-gradient-to-r from-[#782355] to-purple-600 h-2 rounded-full transition-all duration-500"
-                        style={{ 
-                          width: order.status === 'pending' ? '25%' : 
-                                 order.status === 'confirmed' ? '50%' : 
-                                 order.status === 'processing' ? '75%' : 
-                                 order.status === 'shipped' ? '90%' : '100%' 
+                        style={{
+                          width: order.status === 'pending' ? '25%' :
+                            order.status === 'confirmed' ? '50%' :
+                              order.status === 'processing' ? '75%' :
+                                order.status === 'shipped' ? '90%' : '100%'
                         }}
                       ></div>
                     </div>

@@ -135,6 +135,7 @@ const productRouter = require("./src/routes/product.route.js");
 const cartRouter = require("./src/routes/cart.route.js");
 const paymentRouter = require("./src/routes/payment.route.js");
 const recommendationRouter = require("./src/routes/recommendation.route.js");
+const adminRouter = require("./src/routes/admin.route.js");
 
 // Import controllers and socket handlers
 const locationChatSocket = require("./src/locationChatSocket.js");
@@ -144,10 +145,13 @@ const notificationService = require("./src/utils/notificationService.js");
 const groupchatroute = require("./src/routes/groupchat.route.js");
 const searchRouter = require("./src/routes/search.route.js");
 
+const chatRouter = require("./src/routes/chat.route.js");
+
 // chat route
 app.use("/api/", limiter);
 app.use("/api/messages", messageLimiter);
 app.use("/api/messages", groupchatroute);
+app.use("/api/chat", chatRouter);
 
 // Define routes
 app.use("/api/users", userRouter); // Mount the user router at the correct endpoint
@@ -155,6 +159,7 @@ app.use("/api/products", supplierListingRouter); // Mount the supplier listing (
 app.use("/api/items", productRouter); // Mount the new product router for Sellx items
 app.use("/api/search", searchRouter); // Mount the search router
 app.use("/api/cart", cartRouter); // Mount the cart router
+app.use("/api/admin", adminRouter); // Mount the admin router
 app.use("/api/payments", paymentRouter); // Mount the payment router
 app.use("/api/samples", sampleRouter); // Mount the sample router
 app.use("/api/analytics", analyticsRouter); // Mount the analytics router
