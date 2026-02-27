@@ -147,3 +147,9 @@ dist
 
 test.js
 authController.js
+
+generated_seed_data.js
+seed_orders_70.json
+seed_products_70.json
+seed_orders.json
+seed_products_extended.json

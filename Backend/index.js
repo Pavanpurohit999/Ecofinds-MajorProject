@@ -44,7 +44,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://localhost:5000",
+      "http://localhost:5001",
       "https://cc5wnhxq-5001.inc1.devtunnels.ms",
       "https://cc5wnhxq-5173.inc1.devtunnels.ms",
       "https://vendorverse-uzqz.onrender.com",
@@ -62,7 +62,7 @@ app.use(
       "Pragma",
       "Expires",
     ],
-  })
+  }),
 );
 
 // Disable caching in development
@@ -116,7 +116,7 @@ app.use(
     limits: { fileSize: 50 * 1024 * 1024 }, // Optional: limit file size to 50MB
     abortOnLimit: true, // Optional: return 413 when file size is exceeded
     createParentPath: true, // Create the temp directory if it doesn't exist
-  })
+  }),
 ); // This is a third-party middleware function in Express. It parses file uploads and is based on express-fileupload.
 
 // Import routes
@@ -260,7 +260,7 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -5,9 +5,8 @@ import { logApiCall, handleApiError } from "../utils/apiUtils.js";
 const USE_LOCAL_SERVER = import.meta.env.VITE_USE_LOCAL_SERVER === "true"; // Check .env file first, fallback to false
 
 // Base URL for your backend API
-const BASE_URL = USE_LOCAL_SERVER
-  ? import.meta.env.VITE_API_BASE_URL
-  : "http://localhost:5000/api"; // Fixed: Changed from 8000 to 5001
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 
 console.log("🌐 API Base URL:", BASE_URL);
 console.log("🔧 Using Local Server:", USE_LOCAL_SERVER);
@@ -54,7 +53,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle common errors
@@ -66,7 +65,7 @@ apiClient.interceptors.response.use(
         response.config.method,
         response.config.url,
         response.config.data,
-        response
+        response,
       );
     }
     return response;
@@ -81,7 +80,7 @@ apiClient.interceptors.response.use(
         originalRequest?.url || "UNKNOWN",
         originalRequest?.data,
         null,
-        error
+        error,
       );
     }
 
@@ -94,7 +93,7 @@ apiClient.interceptors.response.use(
         const refreshResponse = await axios.post(
           `${BASE_URL}/users/refresh-token`,
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         const newToken = refreshResponse.data.data.accessToken;
@@ -127,7 +126,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

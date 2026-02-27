@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  EyeIcon, 
+import {
+  EyeIcon,
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -29,9 +29,9 @@ const OrdersReceived = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await orderService.getSellerOrders(1, 20, activeTab === 'all' ? '' : activeTab);
-        
+
         if (response.success) {
           setOrders(response.data.orders || []);
         } else {
@@ -52,9 +52,9 @@ const OrdersReceived = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await orderService.getSellerOrders(1, 20, activeTab === 'all' ? '' : activeTab);
-      
+
       if (response.success) {
         setOrders(response.data.orders || []);
       } else {
@@ -72,7 +72,7 @@ const OrdersReceived = () => {
     try {
       setActionLoading(true);
       const response = await orderService.updateOrderStatus(orderId, { action: 'accept' });
-      
+
       if (response.success) {
         // Refresh orders after accepting
         fetchOrders();
@@ -93,7 +93,7 @@ const OrdersReceived = () => {
     try {
       setActionLoading(true);
       const response = await orderService.updateOrderStatus(orderId, { action: 'cancel', notes: 'Order declined by seller' });
-      
+
       if (response.success) {
         // Refresh orders after declining
         fetchOrders();
@@ -113,7 +113,7 @@ const OrdersReceived = () => {
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       setStatusUpdateLoading(true);
-      
+
       // Map status to action
       const statusToAction = {
         'pending': null, // Cannot change to pending
@@ -123,7 +123,7 @@ const OrdersReceived = () => {
         'completed': 'complete',
         'cancelled': 'cancel'
       };
-      
+
       const action = statusToAction[newStatus];
       if (!action) {
         alert('Invalid status update');
@@ -131,7 +131,7 @@ const OrdersReceived = () => {
       }
 
       let payload = { action };
-      
+
       // Special handling for cancel action - ask for reason
       if (action === 'cancel') {
         const reason = prompt('Please enter cancellation reason (optional):');
@@ -139,9 +139,9 @@ const OrdersReceived = () => {
           payload.notes = reason;
         }
       }
-      
+
       const response = await orderService.updateOrderStatus(orderId, payload);
-      
+
       if (response.success) {
         fetchOrders();
         setShowModal(false);
@@ -222,11 +222,10 @@ const OrdersReceived = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
-                    activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
                       ? 'border-[#782355] text-[#782355]'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   {tab.label} ({tab.count})
                 </button>
@@ -264,7 +263,7 @@ const OrdersReceived = () => {
                     </div>
                     <div>
                       <span className="text-gray-500">Total:</span>
-                      <p className="font-bold text-[#782355] text-lg">{formatCurrency(order.totalAmount)}</p>
+                      <p className="font-bold text-[#782355] text-lg">{formatCurrency(order.totalPrice || order.totalAmount || 0)}</p>
                     </div>
                   </div>
 
@@ -289,17 +288,17 @@ const OrdersReceived = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:min-w-[200px]">
-                  <button 
+                  <button
                     onClick={() => handleViewDetails(order)}
                     className="flex items-center justify-center gap-2 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200"
                   >
                     <EyeIcon className="h-4 w-4" />
                     View Details
                   </button>
-                  
+
                   {order.status === 'pending' && (
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => handleAcceptOrder(order._id)}
                         disabled={actionLoading}
                         className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors duration-200"
@@ -307,7 +306,7 @@ const OrdersReceived = () => {
                         <CheckCircleIcon className="h-4 w-4" />
                         {actionLoading ? 'Processing...' : 'Accept Order'}
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeclineOrder(order._id)}
                         disabled={actionLoading}
                         className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors duration-200"
@@ -317,7 +316,7 @@ const OrdersReceived = () => {
                       </button>
                     </div>
                   )}
-                  
+
                   {order.status === 'completed' && (
                     <button className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200">
                       <ChatBubbleLeftRightIcon className="h-4 w-4" />
@@ -411,16 +410,15 @@ const OrdersReceived = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
                       <div className="flex items-center space-x-2">
                         <CurrencyRupeeIcon className="h-4 w-4 text-gray-400" />
-                        <span className="text-lg font-bold text-[#782355]">{formatCurrency(selectedOrder.totalAmount)}</span>
+                        <span className="text-lg font-bold text-[#782355]">{formatCurrency(selectedOrder.totalPrice || selectedOrder.totalAmount || 0)}</span>
                       </div>
                     </div>
 
                     {selectedOrder.paymentStatus && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          selectedOrder.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedOrder.paymentStatus === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {selectedOrder.paymentStatus}
                         </span>
                       </div>
@@ -470,7 +468,7 @@ const OrdersReceived = () => {
                         </button>
                       </>
                     )}
-                    
+
                     {selectedOrder.status === 'confirmed' && (
                       <button
                         onClick={() => handleUpdateOrderStatus(selectedOrder._id, 'processing')}
@@ -480,7 +478,7 @@ const OrdersReceived = () => {
                         {statusUpdateLoading ? 'Processing...' : 'Start Processing'}
                       </button>
                     )}
-                    
+
                     {selectedOrder.status === 'processing' && (
                       <button
                         onClick={() => handleUpdateOrderStatus(selectedOrder._id, 'shipped')}
@@ -490,7 +488,7 @@ const OrdersReceived = () => {
                         {statusUpdateLoading ? 'Processing...' : 'Mark as Shipped'}
                       </button>
                     )}
-                    
+
                     {selectedOrder.status === 'shipped' && (
                       <button
                         onClick={() => handleUpdateOrderStatus(selectedOrder._id, 'completed')}
@@ -500,7 +498,7 @@ const OrdersReceived = () => {
                         {statusUpdateLoading ? 'Processing...' : 'Complete Order'}
                       </button>
                     )}
-                    
+
                     {['pending', 'confirmed', 'processing'].includes(selectedOrder.status) && (
                       <button
                         onClick={() => handleUpdateOrderStatus(selectedOrder._id, 'cancelled')}

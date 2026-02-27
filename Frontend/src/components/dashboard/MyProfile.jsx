@@ -98,9 +98,9 @@ const MyProfile = () => {
             profileImage: user.avatar || null,
             memberSince: user.createdAt
               ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                })
+                year: "numeric",
+                month: "long",
+              })
               : "Unknown",
             profileStatus: user.isProfileComplete ? "Complete" : "Incomplete",
           });
@@ -113,21 +113,21 @@ const MyProfile = () => {
           setStatsData([
             {
               title: "Total Revenue",
-              value: `₹${(financial.totalRevenue || 0).toLocaleString()}`,
+              value: `₹${(financial.revenue?.total || 0).toLocaleString()}`,
               color: "from-green-400 to-green-600",
               icon: "📈",
             },
             {
               title: "Total Expenditure",
-              value: `₹${(financial.totalExpenditure || 0).toLocaleString()}`,
+              value: `₹${(financial.expenditure?.total || 0).toLocaleString()}`,
               color: "from-blue-400 to-blue-600",
               icon: "📊",
             },
             {
               title: "Net Profit",
               value: `₹${(
-                (financial.totalRevenue || 0) -
-                (financial.totalExpenditure || 0)
+                (financial.revenue?.total || 0) -
+                (financial.expenditure?.total || 0)
               ).toLocaleString()}`,
               color: "from-purple-400 to-purple-600",
               icon: "💰",

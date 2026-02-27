@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { AdminAuthProvider, useAdminAuth } from "./admin/context/AdminAuthContext";
 import AuthPage from "./pages/AuthPage";
 import {
   BrowserRouter as Router,
@@ -17,6 +18,9 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import AddItemPage from "./pages/AddItemPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import EnvironmentPage from "./pages/EnvironmentPage";
+import AdminLoginPage from "./admin/pages/AdminLoginPage";
+import AdminLayout from "./admin/pages/AdminLayout";
 
 
 // Scroll to top component
@@ -30,7 +34,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Protected Route Component
+// User Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -43,6 +47,19 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return isAuthenticated ? children : <Navigate to="/authpage" replace />;
+};
+
+// Admin Protected Route Component (isolated from user auth)
+const AdminProtectedRoute = ({ children }) => {
+  const { isAdminAuthenticated, isLoading } = useAdminAuth();
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1f0f" }}>
+        <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  return isAdminAuthenticated ? children : <Navigate to="/admin/login" replace />;
 };
 
 // Simple Error Boundary Component
@@ -101,34 +118,45 @@ class ErrorBoundary extends React.Component {
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <ScrollToTop />
-            <Routes>
-              {/* Public Routes - No authentication required */}
-              <Route path="/authpage" element={<AuthPage />} />
-              <Route path='/' element={<LandingPage />} />
-              <Route path="/products" element={<AllProductsPage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
-              <Route path="/search" element={<SearchResults />} />
-              <Route path="/cart" element={<CartPage />} />
-              
-              {/* Protected Routes - Authentication required */}
-              <Route path="/add-item" element={
-                <ProtectedRoute>
-                  <AddItemPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/dashboard/*" element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
+      <AdminAuthProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Router>
+              <ScrollToTop />
+              <Routes>
+                {/* Public Routes - No authentication required */}
+                <Route path="/authpage" element={<AuthPage />} />
+                <Route path='/' element={<LandingPage />} />
+                <Route path="/products" element={<AllProductsPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/environment" element={<EnvironmentPage />} />
+
+                {/* Protected Routes - Authentication required */}
+                <Route path="/add-item" element={
+                  <ProtectedRoute>
+                    <AddItemPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/dashboard/*" element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                } />
+
+                {/* Admin Routes - Uses AdminAuthContext, completely separate from user auth */}
+                <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/admin/*" element={
+                  <AdminProtectedRoute>
+                    <AdminLayout />
+                  </AdminProtectedRoute>
+                } />
+              </Routes>
+            </Router>
+          </CartProvider>
+        </AuthProvider>
+      </AdminAuthProvider>
     </ErrorBoundary>
   );
 }

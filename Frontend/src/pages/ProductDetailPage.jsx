@@ -295,8 +295,8 @@ const ProductDetailPage = () => {
     product.imageUrls && product.imageUrls.length > 0
       ? product.imageUrls
       : product.imageUrl
-      ? [product.imageUrl]
-      : ["/api/placeholder/600/600"]; // Fallback placeholder
+        ? [product.imageUrl]
+        : ["/api/placeholder/600/600"]; // Fallback placeholder
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -335,11 +335,11 @@ const ProductDetailPage = () => {
             {/* Left Side - Images */}
             <div className="space-y-4">
               {/* Main Image */}
-              <div className="relative bg-gray-100 rounded-2xl overflow-hidden aspect-square">
+              <div className="relative bg-white border border-gray-100 rounded-3xl overflow-hidden aspect-square shadow-sm flex items-center justify-center p-4">
                 <img
                   src={images[currentImageIndex]}
                   alt={product.productTitle}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain mix-blend-multiply"
                 />
 
                 {/* Image Navigation */}
@@ -379,16 +379,15 @@ const ProductDetailPage = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                      index === currentImageIndex
-                        ? "border-[#782355] shadow-lg"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-white p-1 ${index === currentImageIndex
+                        ? "border-green-600 shadow-md ring-2 ring-green-100"
+                        : "border-gray-100 hover:border-green-300"
+                      }`}
                   >
                     <img
                       src={image}
                       alt={`${product.productTitle} ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-lg"
                     />
                   </button>
                 ))}
@@ -418,9 +417,9 @@ const ProductDetailPage = () => {
               </div>
 
               {/* Price */}
-              <div className="bg-gray-50 rounded-xl p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-3xl font-bold text-[#782355]">
+              <div className="bg-gradient-to-br from-green-50 to-green-100/50 border border-green-100 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center gap-4 mb-2">
+                  <span className="text-4xl font-extrabold text-green-800 tracking-tight">
                     ₹{product.price.toLocaleString()}
                   </span>
                   {discountPercentage > 0 && (
@@ -441,15 +440,14 @@ const ProductDetailPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2 text-sm">
                   <div
-                    className={`w-3 h-3 rounded-full ${
-                      product.condition === "New"
+                    className={`w-3 h-3 rounded-full ${product.condition === "New"
                         ? "bg-green-500"
                         : product.condition === "Refurbished"
-                        ? "bg-blue-500"
-                        : product.condition === "Used"
-                        ? "bg-yellow-500"
-                        : "bg-gray-500"
-                    }`}
+                          ? "bg-blue-500"
+                          : product.condition === "Used"
+                            ? "bg-yellow-500"
+                            : "bg-gray-500"
+                      }`}
                   ></div>
                   <span className="text-gray-600">Condition:</span>
                   <span className="font-medium">{product.condition}</span>
@@ -473,9 +471,8 @@ const ProductDetailPage = () => {
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-600">Availability:</span>
                   <span
-                    className={`font-medium ${
-                      product.quantity > 0 ? "text-green-600" : "text-red-600"
-                    }`}
+                    className={`font-medium ${product.quantity > 0 ? "text-green-600" : "text-red-600"
+                      }`}
                   >
                     {product.quantity > 0
                       ? `${product.quantity} available`
@@ -533,32 +530,33 @@ const ProductDetailPage = () => {
                   <button
                     disabled={product.quantity === 0 || addingToCart}
                     onClick={handleAddToCart}
-                    className="flex-1 bg-gradient-to-r from-[#782355] to-[#9c3069] text-white py-3 px-6 rounded-xl font-semibold hover:from-[#9c3069] hover:to-[#782355] transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 shadow-md shadow-green-600/20 text-white py-3 md:py-4 px-6 rounded-2xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
-                    <ShoppingCartIcon className="w-5 h-5" />
-                    {addingToCart ? "Adding..." : "Add to Cart"}
+                    <ShoppingCartIcon className="w-6 h-6" />
+                    <span className="text-lg">
+                      {addingToCart ? "Adding..." : "Add to Cart"}
+                    </span>
                   </button>
                   <button
                     disabled={product.quantity === 0 || isProcessingPayment}
                     onClick={handleBuyNow}
-                    className="flex-1 bg-white text-[#782355] py-3 px-6 rounded-xl font-semibold border-2 border-[#782355] hover:bg-[#782355] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-white text-green-700 py-3 md:py-4 px-6 rounded-2xl font-semibold border-2 border-green-600 hover:bg-green-50 focus:ring-4 focus:ring-green-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                   >
                     {product.quantity === 0
                       ? "Out of Stock"
                       : isProcessingPayment
-                      ? "Processing..."
-                      : "Buy Now"}
+                        ? "Processing..."
+                        : "Buy Now"}
                   </button>
                   <button
                     onClick={() => setIsFavorite(!isFavorite)}
                     className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
                   >
                     <HeartIcon
-                      className={`h-6 w-6 ${
-                        isFavorite
+                      className={`h-6 w-6 ${isFavorite
                           ? "fill-red-500 text-red-500"
                           : "text-gray-600"
-                      }`}
+                        }`}
                     />
                   </button>
                 </div>

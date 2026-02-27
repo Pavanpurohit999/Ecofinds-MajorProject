@@ -16,7 +16,8 @@ import PlaceholderImage from "../common/PlaceholderImage";
 
 // Vite: use import.meta.env.VITE_API_BASE_URL, fallback to localhost for dev
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE_URL?.replace("/api", "") ||
+  "http://localhost:5001";
 
 const ProductCard = ({ product, onViewDetails }) => {
   const [imageStatus, setImageStatus] = useState("pending"); // pending | loaded | failed
@@ -84,11 +85,11 @@ const ProductCard = ({ product, onViewDetails }) => {
     // 1. imageDetails array (preferred primary)
     if (Array.isArray(imageDetails) && imageDetails.length) {
       const primary = imageDetails.find(
-        (i) => i?.isPrimary && (i?.url || i?.path || i?.src)
+        (i) => i?.isPrimary && (i?.url || i?.path || i?.src),
       );
       if (primary) {
         const s = normalizeSingle(
-          primary.url ?? primary.path ?? primary.src ?? primary
+          primary.url ?? primary.path ?? primary.src ?? primary,
         );
         if (s) return s;
       }
@@ -146,7 +147,7 @@ const ProductCard = ({ product, onViewDetails }) => {
       photo,
       product?.id,
       product?._id,
-    ]
+    ],
   );
 
   const fallbackPlaceholder = useMemo(() => {
@@ -167,7 +168,7 @@ const ProductCard = ({ product, onViewDetails }) => {
       setImgSrc(fallbackPlaceholder);
       console.warn(
         "[ProductCard] no image src available for product:",
-        product?.id ?? product?._id
+        product?.id ?? product?._id,
       );
       return;
     }
@@ -228,7 +229,7 @@ const ProductCard = ({ product, onViewDetails }) => {
     product?.seller ??
     product?.userName ??
     (product?.userId && typeof product.userId === "object"
-      ? product.userId.name ?? product.userId.username ?? product.userId.$oid
+      ? (product.userId.name ?? product.userId.username ?? product.userId.$oid)
       : null) ??
     (typeof product.userId === "string" ? product.userId : null) ??
     "Unknown seller";
@@ -237,15 +238,15 @@ const ProductCard = ({ product, onViewDetails }) => {
     condition === "New"
       ? "bg-green-100 text-green-800"
       : condition === "Used"
-      ? "bg-yellow-100 text-yellow-800"
-      : condition === "Refurbished"
-      ? "bg-blue-100 text-blue-800"
-      : "bg-gray-100 text-gray-800";
+        ? "bg-yellow-100 text-yellow-800"
+        : condition === "Refurbished"
+          ? "bg-blue-100 text-blue-800"
+          : "bg-gray-100 text-gray-800";
 
   return (
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-100 relative">
       {/* IMAGE AREA */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden bg-gray-50 border-b border-gray-100">
         {imgSrc ? (
           <img
             src={imgSrc}
@@ -253,7 +254,7 @@ const ProductCard = ({ product, onViewDetails }) => {
             decoding="async"
             loading="lazy"
             crossOrigin="anonymous"
-            className="w-full h-48 md:h-56 object-cover transition-transform duration-300 group-hover:scale-110 min-h-[160px] bg-gray-100"
+            className="w-full h-52 md:h-60 object-contain transition-transform duration-500 group-hover:scale-105 min-h-[160px] bg-white mix-blend-multiply"
             style={{ display: "block" }}
             onError={(e) => {
               console.warn("IMG element onError for", e?.target?.src);
@@ -273,7 +274,7 @@ const ProductCard = ({ product, onViewDetails }) => {
               <img
                 src={fallbackPlaceholder}
                 alt="placeholder"
-                className="w-full h-48 md:h-56 object-cover"
+                className="w-full h-52 md:h-60 object-cover"
                 decoding="async"
                 loading="lazy"
               />
@@ -284,19 +285,18 @@ const ProductCard = ({ product, onViewDetails }) => {
         {/* STATUS BADGE */}
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
           <span
-            className={`text-xs font-semibold px-2 py-1 rounded-full ${
-              imageStatus === "loaded"
+            className={`text-xs font-semibold px-2 py-1 rounded-full ${imageStatus === "loaded"
                 ? "bg-green-600 text-white"
                 : imageStatus === "pending"
-                ? "bg-yellow-500 text-white"
-                : "bg-red-600 text-white"
-            }`}
+                  ? "bg-yellow-500 text-white"
+                  : "bg-red-600 text-white"
+              }`}
           >
             {imageStatus === "loaded"
               ? "Image OK"
               : imageStatus === "pending"
-              ? "Loading..."
-              : "Image Failed"}
+                ? "Loading..."
+                : "Image Failed"}
           </span>
         </div>
 
@@ -392,7 +392,7 @@ const ProductCard = ({ product, onViewDetails }) => {
 
         <button
           onClick={() => onViewDetails?.(product)}
-          className="w-full bg-[#782355] text-white py-2 md:py-3 rounded-lg font-medium hover:bg-[#8e2a63] transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 md:py-3 rounded-lg font-medium hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg transform active:scale-[0.98]"
         >
           View Details
         </button>
