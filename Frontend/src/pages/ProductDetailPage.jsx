@@ -25,6 +25,8 @@ import {
 } from "../services/paymentService";
 import { useRetry } from "../hooks/useUtils";
 import { useCart } from "../hooks/useCart";
+import { useWishlist } from "../context/WishlistContext";
+import { toast } from "react-hot-toast";
 import Navbar from "../components/landing/Navbar";
 import Footer from "../components/landing/Footer";
 
@@ -40,9 +42,10 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { retryCount, canRetry, retry, reset } = useRetry();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isWishlistUpdating, setIsWishlistUpdating] = useState(false);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +68,7 @@ const ProductDetailPage = () => {
         title: p.productTitle ?? p.title,
         price: p.price,
         img: p.imageUrl ?? (p.imageUrls && p.imageUrls[0]),
-      }))
+      })),
     );
   }, [similarProducts]);
   const {
@@ -199,6 +202,28 @@ const ProductDetailPage = () => {
     }
   };
 
+  const handleToggleWishlist = async () => {
+    const productId = product?._id || product?.id;
+    if (!productId || isWishlistUpdating) return;
+
+    try {
+      setIsWishlistUpdating(true);
+      const response = await toggleWishlist(productId);
+      if (response.success) {
+        toast.success(
+          response.isWishlisted ? "Added to wishlist" : "Removed from wishlist",
+        );
+      } else if (response.message) {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      console.error("Failed to update wishlist:", err);
+      toast.error("Failed to update wishlist. Please try again.");
+    } finally {
+      setIsWishlistUpdating(false);
+    }
+  };
+
   // Fetch product details from API
   useEffect(() => {
     const fetchProduct = async () => {
@@ -218,7 +243,7 @@ const ProductDetailPage = () => {
       } catch (err) {
         console.error("Error fetching product:", err);
         setError(
-          err.response?.data?.message || "Failed to load product details"
+          err.response?.data?.message || "Failed to load product details",
         );
       } finally {
         setLoading(false);
@@ -309,8 +334,10 @@ const ProductDetailPage = () => {
   // Calculate original price for discount display (assuming 20% markup for display)
   const originalPrice = Math.round(product.price * 1.2);
   const discountPercentage = Math.round(
-    ((originalPrice - product.price) / originalPrice) * 100
+    ((originalPrice - product.price) / originalPrice) * 100,
   );
+  const currentProductId = product._id || product.id;
+  const isFavorite = isInWishlist(currentProductId);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -362,7 +389,8 @@ const ProductDetailPage = () => {
 
                 {/* Favorite Button */}
                 <button
-                  onClick={() => setIsFavorite(!isFavorite)}
+                  onClick={handleToggleWishlist}
+                  disabled={isWishlistUpdating}
                   className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-all duration-200"
                 >
                   {isFavorite ? (
@@ -379,10 +407,11 @@ const ProductDetailPage = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-white p-1 ${index === currentImageIndex
-                      ? "border-green-600 shadow-md ring-2 ring-green-100"
-                      : "border-gray-100 hover:border-green-300"
-                      }`}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-white p-1 ${
+                      index === currentImageIndex
+                        ? "border-green-600 shadow-md ring-2 ring-green-100"
+                        : "border-gray-100 hover:border-green-300"
+                    }`}
                   >
                     <img
                       src={image}
@@ -440,14 +469,15 @@ const ProductDetailPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2 text-sm">
                   <div
-                    className={`w-3 h-3 rounded-full ${product.condition === "New"
-                      ? "bg-green-500"
-                      : product.condition === "Refurbished"
-                        ? "bg-blue-500"
-                        : product.condition === "Used"
-                          ? "bg-yellow-500"
-                          : "bg-gray-500"
-                      }`}
+                    className={`w-3 h-3 rounded-full ${
+                      product.condition === "New"
+                        ? "bg-green-500"
+                        : product.condition === "Refurbished"
+                          ? "bg-blue-500"
+                          : product.condition === "Used"
+                            ? "bg-yellow-500"
+                            : "bg-gray-500"
+                    }`}
                   ></div>
                   <span className="text-gray-600">Condition:</span>
                   <span className="font-medium">{product.condition}</span>
@@ -471,8 +501,9 @@ const ProductDetailPage = () => {
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-600">Availability:</span>
                   <span
-                    className={`font-medium ${product.quantity > 0 ? "text-green-600" : "text-red-600"
-                      }`}
+                    className={`font-medium ${
+                      product.quantity > 0 ? "text-green-600" : "text-red-600"
+                    }`}
                   >
                     {product.quantity > 0
                       ? `${product.quantity} available`
@@ -512,7 +543,7 @@ const ProductDetailPage = () => {
                     <button
                       onClick={() =>
                         setSelectedQuantity(
-                          Math.min(product.quantity, selectedQuantity + 1)
+                          Math.min(product.quantity, selectedQuantity + 1),
                         )
                       }
                       disabled={selectedQuantity >= product.quantity}
@@ -528,10 +559,24 @@ const ProductDetailPage = () => {
 
                 <div className="flex gap-3 mt-4">
                   <button
-                    onClick={() => navigate(`/chat?seller=${product.userId?._id}`)}
+                    onClick={() =>
+                      navigate(`/chat?seller=${product.userId?._id}`)
+                    }
                     className="flex-1 bg-white text-[#782355] py-3 md:py-4 px-6 rounded-2xl font-semibold border-2 border-[#782355] hover:bg-pink-50 transition-all duration-300 flex items-center justify-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                      />
+                    </svg>
                     <span>Message Seller</span>
                   </button>
                 </div>
@@ -559,14 +604,16 @@ const ProductDetailPage = () => {
                         : "Buy Now"}
                   </button>
                   <button
-                    onClick={() => setIsFavorite(!isFavorite)}
+                    onClick={handleToggleWishlist}
+                    disabled={isWishlistUpdating}
                     className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
                   >
                     <HeartIcon
-                      className={`h-6 w-6 ${isFavorite
-                        ? "fill-red-500 text-red-500"
-                        : "text-gray-600"
-                        }`}
+                      className={`h-6 w-6 ${
+                        isFavorite
+                          ? "fill-red-500 text-red-500"
+                          : "text-gray-600"
+                      }`}
                     />
                   </button>
                 </div>

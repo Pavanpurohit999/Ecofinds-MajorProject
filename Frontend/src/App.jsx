@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-import { AdminAuthProvider, useAdminAuth } from "./admin/context/AdminAuthContext";
+import {
+  AdminAuthProvider,
+  useAdminAuth,
+} from "./admin/context/AdminAuthContext";
 import AuthPage from "./pages/AuthPage";
 import {
   BrowserRouter as Router,
@@ -26,6 +30,7 @@ import ChatPage from "./pages/ChatPage";
 import { SocketProvider } from "./context/SocketContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ChatProvider } from "./context/ChatContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -58,12 +63,19 @@ const AdminProtectedRoute = ({ children }) => {
   const { isAdminAuthenticated, isLoading } = useAdminAuth();
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1f0f" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "#0f1f0f" }}
+      >
         <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-  return isAdminAuthenticated ? children : <Navigate to="/admin/login" replace />;
+  return isAdminAuthenticated ? (
+    children
+  ) : (
+    <Navigate to="/admin/login" replace />
+  );
 };
 
 // Simple Error Boundary Component
@@ -83,7 +95,7 @@ class ErrorBoundary extends React.Component {
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null });
-  }
+  };
 
   render() {
     if (this.state.hasError) {
@@ -126,50 +138,75 @@ function App() {
         <AuthProvider>
           <SocketProvider>
             <NotificationProvider>
-              <ChatProvider>
-                <CartProvider>
-                  <Router>
-                    <ScrollToTop />
-                    <Routes>
-                      {/* Public Routes - No authentication required */}
-                      <Route path="/authpage" element={<AuthPage />} />
-                      <Route path='/' element={<LandingPage />} />
-                      <Route path="/products" element={<AllProductsPage />} />
-                      <Route path="/product/:id" element={<ProductDetailPage />} />
-                      <Route path="/search" element={<SearchResults />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/environment" element={<EnvironmentPage />} />
+              <WishlistProvider>
+                <ChatProvider>
+                  <CartProvider>
+                    <Router>
+                      <Toaster
+                        position="top-center"
+                        toastOptions={{ duration: 3000 }}
+                      />
+                      <ScrollToTop />
+                      <Routes>
+                        {/* Public Routes - No authentication required */}
+                        <Route path="/authpage" element={<AuthPage />} />
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/products" element={<AllProductsPage />} />
+                        <Route
+                          path="/product/:id"
+                          element={<ProductDetailPage />}
+                        />
+                        <Route path="/search" element={<SearchResults />} />
+                        <Route path="/cart" element={<CartPage />} />
+                        <Route
+                          path="/environment"
+                          element={<EnvironmentPage />}
+                        />
 
-                      <Route path="/environment" element={<EnvironmentPage />} />
+                        {/* Protected Routes - Authentication required */}
+                        <Route
+                          path="/chat"
+                          element={
+                            <ProtectedRoute>
+                              <ChatPage />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/add-item"
+                          element={
+                            <ProtectedRoute>
+                              <AddItemPage />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/dashboard/*"
+                          element={
+                            <ProtectedRoute>
+                              <DashboardLayout />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                      {/* Protected Routes - Authentication required */}
-                      <Route path="/chat" element={
-                        <ProtectedRoute>
-                          <ChatPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/add-item" element={
-                        <ProtectedRoute>
-                          <AddItemPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dashboard/*" element={
-                        <ProtectedRoute>
-                          <DashboardLayout />
-                        </ProtectedRoute>
-                      } />
-
-                      {/* Admin Routes - Uses AdminAuthContext, completely separate from user auth */}
-                      <Route path="/admin/login" element={<AdminLoginPage />} />
-                      <Route path="/admin/*" element={
-                        <AdminProtectedRoute>
-                          <AdminLayout />
-                        </AdminProtectedRoute>
-                      } />
-                    </Routes>
-                  </Router>
-                </CartProvider>
-              </ChatProvider>
+                        {/* Admin Routes - Uses AdminAuthContext, completely separate from user auth */}
+                        <Route
+                          path="/admin/login"
+                          element={<AdminLoginPage />}
+                        />
+                        <Route
+                          path="/admin/*"
+                          element={
+                            <AdminProtectedRoute>
+                              <AdminLayout />
+                            </AdminProtectedRoute>
+                          }
+                        />
+                      </Routes>
+                    </Router>
+                  </CartProvider>
+                </ChatProvider>
+              </WishlistProvider>
             </NotificationProvider>
           </SocketProvider>
         </AuthProvider>

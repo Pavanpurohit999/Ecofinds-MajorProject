@@ -72,7 +72,7 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
 
     const notification = await Notification.findOneAndUpdate(
         { _id: notificationId, userId },
-        { 
+        {
             isRead: true,
             readAt: new Date()
         },
@@ -99,6 +99,8 @@ const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
     );
 });
 
+
+
 // Delete notification
 const deleteNotification = asyncHandler(async (req, res) => {
     const { notificationId } = req.params;
@@ -118,22 +120,33 @@ const deleteNotification = asyncHandler(async (req, res) => {
     );
 });
 
+// Delete all notifications for a user
+const deleteAllNotifications = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const result = await Notification.deleteMany({ userId });
+
+    res.status(200).json(
+        new ApiResponse(200, { deletedCount: result.deletedCount }, 'All notifications deleted successfully')
+    );
+});
+
 // Get notification summary for dashboard
 const getNotificationSummary = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
     const [summary, recentActionRequired, categoryBreakdown] = await Promise.all([
         Notification.getUserNotificationSummary(userId),
-        
+
         // Get recent notifications that require action
         Notification.find({
             userId,
             actionRequired: true,
             isRead: false
         })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean(),
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .lean(),
 
         // Get breakdown by category
         Notification.aggregate([
@@ -211,9 +224,9 @@ const getNotificationsByType = asyncHandler(async (req, res) => {
             { expiresAt: { $gt: new Date() } }
         ]
     })
-    .sort({ createdAt: -1 })
-    .limit(Number(limit))
-    .lean();
+        .sort({ createdAt: -1 })
+        .limit(Number(limit))
+        .lean();
 
     const enhancedNotifications = notifications.map(notification => ({
         ...notification,
@@ -228,12 +241,12 @@ const getNotificationsByType = asyncHandler(async (req, res) => {
 // Helper functions
 const getTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - date) / 1000);
-    
+
     if (seconds < 60) return 'Just now';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     if (seconds < 2592000) return `${Math.floor(seconds / 86400)}d ago`;
-    
+
     return date.toLocaleDateString();
 };
 
@@ -274,6 +287,7 @@ module.exports = {
     markNotificationAsRead,
     markAllNotificationsAsRead,
     deleteNotification,
+    deleteAllNotifications,
     getNotificationSummary,
     createNotification,
     getNotificationsByType

@@ -8,7 +8,7 @@ export const notificationService = {
       const params = { page, limit };
       if (type) params.type = type;
       if (isRead !== null) params.isRead = isRead;
-      
+
       const response = await apiClient.get('/notifications', { params });
       return response.data;
     } catch (error) {
@@ -31,7 +31,7 @@ export const notificationService = {
   // Get notifications by specific type
   getNotificationsByType: async (type) => {
     try {
-      const response = await apiClient.get(`/api/notifications/type/${type}`);
+      const response = await apiClient.get(`/notifications/type/${type}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching notifications by type:', error);
@@ -42,7 +42,7 @@ export const notificationService = {
   // Mark specific notification as read
   markNotificationAsRead: async (notificationId) => {
     try {
-      const response = await apiClient.put(`/api/notifications/${notificationId}/read`);
+      const response = await apiClient.put(`/notifications/${notificationId}/read`);
       return response.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -53,7 +53,7 @@ export const notificationService = {
   // Mark all notifications as read
   markAllNotificationsAsRead: async () => {
     try {
-      const response = await apiClient.put('/api/notifications/mark-all-read');
+      const response = await apiClient.put('/notifications/mark-all-read');
       return response.data;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -61,10 +61,21 @@ export const notificationService = {
     }
   },
 
+  // Delete all notifications
+  deleteAllNotifications: async () => {
+    try {
+      const response = await apiClient.delete('/notifications/delete-all');
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+      throw error.response?.data || error;
+    }
+  },
+
   // Delete a notification
   deleteNotification: async (notificationId) => {
     try {
-      const response = await apiClient.delete(`/api/notifications/${notificationId}`);
+      const response = await apiClient.delete(`/notifications/${notificationId}`);
       return response.data;
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -75,7 +86,7 @@ export const notificationService = {
   // Create notification (admin/system use)
   createNotification: async (notificationData) => {
     try {
-      const response = await apiClient.post('/api/notifications/create', notificationData);
+      const response = await apiClient.post('/notifications/create', notificationData);
       return response.data;
     } catch (error) {
       console.error('Error creating notification:', error);

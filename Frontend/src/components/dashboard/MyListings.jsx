@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  PlusIcon, 
-  ArrowPathIcon, 
-  EyeIcon, 
-  PencilIcon, 
+import {
+  PlusIcon,
+  ArrowPathIcon,
+  EyeIcon,
+  PencilIcon,
   TrashIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
@@ -80,6 +80,7 @@ const MyListings = () => {
     { title: 'Total Products', value: products.length, color: 'bg-blue-500', icon: '📦' },
     { title: 'Active Listings', value: products.filter(p => p.isActive).length, color: 'bg-green-500', icon: '✅' },
     { title: 'Total Views', value: products.reduce((total, p) => total + (p.viewCount || 0), 0), color: 'bg-purple-500', icon: '👁️' },
+    { title: 'Total Likes', value: products.reduce((total, p) => total + (p.likesCount || 0), 0), color: 'bg-pink-500', icon: '❤️' },
     { title: 'Out of Stock', value: products.filter(p => p.quantity === 0).length, color: 'bg-orange-500', icon: '🏷️' }
   ];
 
@@ -109,7 +110,7 @@ const MyListings = () => {
             <p className="text-gray-600">Manage your product listings and inventory</p>
           </div>
           <div className="flex gap-3 mt-4 sm:mt-0">
-            <button 
+            <button
               onClick={fetchMyProducts}
               disabled={loading}
               className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50"
@@ -117,7 +118,7 @@ const MyListings = () => {
               <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button 
+            <button
               onClick={() => navigate('/add-item')}
               className="flex items-center gap-2 bg-[#782355] text-white px-4 py-2 rounded-lg hover:bg-[#8e2a63] transition-colors duration-200"
             >
@@ -150,11 +151,10 @@ const MyListings = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-[#782355] text-[#782355]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${activeTab === tab.id
+                    ? 'border-[#782355] text-[#782355]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   {tab.label} ({tab.count})
                 </button>
@@ -172,7 +172,7 @@ const MyListings = () => {
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-600 mb-4">{error}</p>
-            <button 
+            <button
               onClick={fetchMyProducts}
               className="bg-[#782355] text-white px-6 py-2 rounded-lg hover:bg-[#8e2a63] transition-colors"
             >
@@ -208,9 +208,9 @@ const MyListings = () => {
                     <h3 className="font-semibold text-gray-900 text-lg">{product.productTitle}</h3>
                     <span className="text-lg font-bold text-[#782355]">₹{product.price.toLocaleString()}</span>
                   </div>
-                  
+
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.productDescription || 'No description'}</p>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Stock:</span>
@@ -219,6 +219,10 @@ const MyListings = () => {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Views:</span>
                       <span className="font-medium">{product.viewCount || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Likes:</span>
+                      <span className="font-medium">{product.likesCount || 0}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">Added:</span>
@@ -235,33 +239,32 @@ const MyListings = () => {
 
                   {/* Action Buttons */}
                   <div className="space-y-2">
-                    <button 
+                    <button
                       onClick={() => navigate(`/product/${product._id}`)}
                       className="w-full flex items-center justify-center gap-2 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200"
                     >
                       <EyeIcon className="h-4 w-4" />
                       View Details
                     </button>
-                    
+
                     <div className="grid grid-cols-3 gap-2">
-                      <button 
+                      <button
                         onClick={() => handleToggleStatus(product._id)}
-                        className={`flex items-center justify-center gap-1 py-2 rounded-lg transition-colors duration-200 ${
-                          product.isActive 
-                            ? 'bg-red-500 text-white hover:bg-red-600' 
-                            : 'bg-green-500 text-white hover:bg-green-600'
-                        }`}
+                        className={`flex items-center justify-center gap-1 py-2 rounded-lg transition-colors duration-200 ${product.isActive
+                          ? 'bg-red-500 text-white hover:bg-red-600'
+                          : 'bg-green-500 text-white hover:bg-green-600'
+                          }`}
                       >
                         <XCircleIcon className="h-4 w-4" />
                         <span className="text-xs">{product.isActive ? 'Hide' : 'Show'}</span>
                       </button>
-                    
+
                       <button className="flex items-center justify-center gap-1 bg-[#782355] text-white py-2 rounded-lg hover:bg-[#8e2a63] transition-colors duration-200">
                         <PencilIcon className="h-4 w-4" />
                         <span className="text-xs">Edit</span>
                       </button>
-                    
-                      <button 
+
+                      <button
                         onClick={() => handleDeleteProduct(product._id)}
                         className="flex items-center justify-center gap-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors duration-200"
                       >

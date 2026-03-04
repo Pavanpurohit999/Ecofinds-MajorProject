@@ -136,6 +136,7 @@ const cartRouter = require("./src/routes/cart.route.js");
 const paymentRouter = require("./src/routes/payment.route.js");
 const recommendationRouter = require("./src/routes/recommendation.route.js");
 const adminRouter = require("./src/routes/admin.route.js");
+const wishlistRouter = require("./src/routes/wishlist.route.js");
 
 // Import controllers and socket handlers
 const locationChatSocket = require("./src/locationChatSocket.js");
@@ -170,7 +171,8 @@ app.use("/api/material-requests", materialRequestRouter); // Mount the material 
 app.use("/api/notifications", notificationRouter); // Mount the notification router
 app.use("/api/negotiations", negotiationRouter); // Mount the negotiation router
 app.use("/api/order-chat", orderChatRouter); // Mount the order chat router
-app.use("/api/recommendations", recommendationRouter); // Mount the recommendation router
+app.use("/api/recommendations", recommendationRouter);
+app.use("/api/wishlist", wishlistRouter); // Mount the recommendation router
 
 // private chat
 // app.use('/api/chat', chatRoutes); // chating route

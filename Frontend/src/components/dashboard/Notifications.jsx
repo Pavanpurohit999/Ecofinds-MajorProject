@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   BellIcon,
   ArrowPathIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
 import { notificationService } from '../../services/notificationService';
+import { useNotification } from '../../context/NotificationContext';
 
 const Notifications = () => {
+  const { markAsRead, deleteNotification: apiDeleteNotification, deleteAllNotifications, unreadCount } = useNotification();
   const [activeTab, setActiveTab] = useState('all');
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [menuOpenId, setMenuOpenId] = useState(null);
   const [summary, setSummary] = useState({
     total: 0,
     unread: 0,
@@ -30,7 +33,7 @@ const Notifications = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       let response;
       if (activeTab === 'all') {
         response = await notificationService.getUserNotifications(1, 20);
@@ -39,7 +42,7 @@ const Notifications = () => {
       } else {
         response = await notificationService.getNotificationsByType(activeTab);
       }
-      
+
       if (response.success) {
         setNotifications(response.data.notifications || []);
       } else {
@@ -66,19 +69,18 @@ const Notifications = () => {
 
   const handleMarkAsRead = async (notificationId) => {
     try {
-      const response = await notificationService.markNotificationAsRead(notificationId);
-      if (response.success) {
-        // Update local state
-        setNotifications(prev => 
-          prev.map(notif => 
-            notif._id === notificationId 
-              ? { ...notif, isRead: true }
-              : notif
-          )
-        );
-        // Refresh summary
-        fetchNotificationSummary();
-      }
+      await markAsRead(notificationId);
+      // Update local state if needed (context usually handles its own, but this component manages its own fetch)
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif._id === notificationId
+            ? { ...notif, isRead: true }
+            : notif
+        )
+      );
+      // Refresh summary
+      fetchNotificationSummary();
+      setMenuOpenId(null);
     } catch (err) {
       console.error('Error marking notification as read:', err);
     }
@@ -89,7 +91,7 @@ const Notifications = () => {
       const response = await notificationService.markAllNotificationsAsRead();
       if (response.success) {
         // Update all notifications to read
-        setNotifications(prev => 
+        setNotifications(prev =>
           prev.map(notif => ({ ...notif, isRead: true }))
         );
         // Refresh summary
@@ -102,17 +104,34 @@ const Notifications = () => {
 
   const handleDeleteNotification = async (notificationId) => {
     try {
-      const response = await notificationService.deleteNotification(notificationId);
-      if (response.success) {
-        // Remove from local state
-        setNotifications(prev => 
-          prev.filter(notif => notif._id !== notificationId)
-        );
-        // Refresh summary
-        fetchNotificationSummary();
-      }
+      await apiDeleteNotification(notificationId);
+      // Remove from local state
+      setNotifications(prev =>
+        prev.filter(notif => notif._id !== notificationId)
+      );
+      // Refresh summary
+      fetchNotificationSummary();
+      setMenuOpenId(null);
     } catch (err) {
       console.error('Error deleting notification:', err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Are you sure you want to delete all notifications?')) return;
+    try {
+      await deleteAllNotifications();
+      setNotifications([]);
+      setSummary({
+        total: 0,
+        unread: 0,
+        orders: 0,
+        delivery: 0,
+        reviews: 0,
+        messages: 0
+      });
+    } catch (err) {
+      console.error('Error clearing all notifications:', err);
     }
   };
 
@@ -157,13 +176,19 @@ const Notifications = () => {
               <p className="text-gray-600">Stay updated with your latest activities</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200">
+            <button
+              onClick={fetchNotifications}
+              className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200"
+            >
               <ArrowPathIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Refresh</span>
             </button>
-            <button className="text-[#782355] hover:text-[#8e2a63] font-medium">
+            <button
+              onClick={handleClearAll}
+              className="text-[#782355] hover:text-[#8e2a63] font-medium"
+            >
               Clear all
             </button>
           </div>
@@ -177,11 +202,10 @@ const Notifications = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'border-[#782355] text-[#782355]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
+                    ? 'border-[#782355] text-[#782355]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   {tab.label} ({tab.count})
                 </button>
@@ -193,11 +217,10 @@ const Notifications = () => {
         {/* Notifications List */}
         <div className="space-y-3">
           {notifications.map((notification) => (
-            <div 
-              key={notification.id} 
-              className={`bg-white rounded-xl border-l-4 p-6 shadow-sm hover:shadow-md transition-all duration-200 ${
-                getPriorityColor(notification.priority)
-              } ${!notification.isRead ? 'ring-2 ring-blue-100' : ''}`}
+            <div
+              key={notification._id}
+              className={`bg-white rounded-xl border-l-4 p-6 shadow-sm hover:shadow-md transition-all duration-200 ${getPriorityColor(notification.priority)
+                } ${!notification.isRead ? 'ring-2 ring-blue-100' : ''}`}
             >
               <div className="flex items-start gap-4">
                 {/* Icon */}
@@ -228,15 +251,40 @@ const Notifications = () => {
                           <span className={`w-2 h-2 rounded-full ${getTypeColor(notification.type)} bg-current`}></span>
                           {notification.type}
                         </span>
-                        <span>{notification.time}</span>
+                        <span>{notification.timeAgo || notification.time || 'recently'}</span>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <button className="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <div className="flex items-center gap-2 relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpenId(menuOpenId === notification._id ? null : notification._id);
+                        }}
+                        className="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1"
+                      >
                         <EllipsisVerticalIcon className="h-5 w-5" />
                       </button>
+
+                      {menuOpenId === notification._id && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-10 py-1">
+                          {!notification.isRead && (
+                            <button
+                              onClick={() => handleMarkAsRead(notification._id)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            >
+                              Mark as read
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteNotification(notification._id)}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-rose-50"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

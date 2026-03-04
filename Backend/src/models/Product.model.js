@@ -142,6 +142,11 @@ const ProductSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    likesCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     // Tags for better search
     tags: [
       {
@@ -171,6 +176,7 @@ ProductSchema.index({ "location.lat": 1, "location.lng": 1 });
 ProductSchema.index({ createdAt: -1 });
 ProductSchema.index({ soldCount: -1 });
 ProductSchema.index({ viewCount: -1 });
+ProductSchema.index({ likesCount: -1 });
 ProductSchema.index({ productCategory: 1, price: 1 });
 
 // Text search index

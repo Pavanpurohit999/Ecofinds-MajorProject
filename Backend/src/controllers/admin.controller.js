@@ -2,6 +2,7 @@ const Admin = require("../models/Admin.model");
 const User = require("../models/User.model");
 const Product = require("../models/Product.model");
 const Order = require("../models/Order.model");
+const Notification = require("../models/Notification.model");
 const asynchandler = require("../utils/asynchandler");
 const apiError = require("../utils/apiError");
 const ApiResponse = require("../utils/apiResponse");
@@ -336,6 +337,134 @@ const getEnvironmentStats = asynchandler(async (req, res) => {
     );
 });
 
+// ──────────────────── USER ACTIONS ────────────────────
+const updateUserStatus = asynchandler(async (req, res) => {
+    const { id } = req.params;
+    const { isSuspended } = req.body;
+
+    if (typeof isSuspended !== "boolean") {
+        throw new apiError(400, "isSuspended must be a boolean");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        id,
+        { isSuspended },
+        { new: true }
+    ).select("-password -refresh_token -emailVerificationOTP -signinOTP").lean();
+
+    if (!user) throw new apiError(404, "User not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, { user }, `User ${isSuspended ? "suspended" : "activated"} successfully`)
+    );
+});
+
+const updateUserRole = asynchandler(async (req, res) => {
+    const { id } = req.params;
+    const { isSupplier, isVendor } = req.body;
+
+    const update = {};
+    if (typeof isSupplier === "boolean") update.isSupplier = isSupplier;
+    if (typeof isVendor === "boolean") update.isVendor = isVendor;
+
+    if (Object.keys(update).length === 0) {
+        throw new apiError(400, "Provide at least one role field (isSupplier or isVendor)");
+    }
+
+    const user = await User.findByIdAndUpdate(id, update, { new: true })
+        .select("-password -refresh_token -emailVerificationOTP -signinOTP").lean();
+
+    if (!user) throw new apiError(404, "User not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, { user }, "User role updated successfully")
+    );
+});
+
+const deleteUser = asynchandler(async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) throw new apiError(404, "User not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "User deleted successfully")
+    );
+});
+
+// ──────────────────── PRODUCT ACTIONS ────────────────────
+const deleteProduct = asynchandler(async (req, res) => {
+    const { id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) throw new apiError(404, "Product not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Product deleted successfully")
+    );
+});
+
+// ──────────────────── ORDER ACTIONS ────────────────────
+const VALID_ORDER_STATUSES = ["pending", "confirmed", "processing", "shipped", "delivered", "completed", "cancelled",
+    "Pending", "Confirmed", "Processing", "Shipped", "Delivered", "Completed", "Cancelled"];
+
+// Map status → notification payload for buyer
+const STATUS_NOTIFICATION_MAP = {
+    confirmed: { type: "order_confirmed", title: "Order Confirmed ✅", message: (p) => `Your order for "${p}" has been confirmed by the platform.`, priority: "high" },
+    Confirmed: { type: "order_confirmed", title: "Order Confirmed ✅", message: (p) => `Your order for "${p}" has been confirmed by the platform.`, priority: "high" },
+    processing: { type: "order_confirmed", title: "Order Is Being Processed", message: (p) => `Your order for "${p}" is now being processed.`, priority: "medium" },
+    Processing: { type: "order_confirmed", title: "Order Is Being Processed", message: (p) => `Your order for "${p}" is now being processed.`, priority: "medium" },
+    shipped: { type: "order_shipped", title: "Order Shipped 🚚", message: (p) => `Your order for "${p}" has been shipped and is on its way!`, priority: "high" },
+    Shipped: { type: "order_shipped", title: "Order Shipped 🚚", message: (p) => `Your order for "${p}" has been shipped and is on its way!`, priority: "high" },
+    delivered: { type: "order_completed", title: "Order Delivered 📦", message: (p) => `Your order for "${p}" has been delivered. Enjoy!`, priority: "high" },
+    Delivered: { type: "order_completed", title: "Order Delivered 📦", message: (p) => `Your order for "${p}" has been delivered. Enjoy!`, priority: "high" },
+    completed: { type: "order_completed", title: "Order Completed 🎉", message: (p) => `Your order for "${p}" is marked as completed. Thank you!`, priority: "medium" },
+    Completed: { type: "order_completed", title: "Order Completed 🎉", message: (p) => `Your order for "${p}" is marked as completed. Thank you!`, priority: "medium" },
+    cancelled: { type: "order_confirmed", title: "Order Cancelled ❌", message: (p) => `Your order for "${p}" has been cancelled by the platform.`, priority: "urgent" },
+    Cancelled: { type: "order_confirmed", title: "Order Cancelled ❌", message: (p) => `Your order for "${p}" has been cancelled by the platform.`, priority: "urgent" },
+};
+
+const updateOrderStatus = asynchandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status || !VALID_ORDER_STATUSES.includes(status)) {
+        throw new apiError(400, `Invalid status. Must be one of: ${VALID_ORDER_STATUSES.slice(0, 7).join(", ")}`);
+    }
+
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true })
+        .populate("buyerId", "name username email")
+        .populate("sellerId", "name username email")
+        .populate("productId", "productTitle productCategory condition")
+        .lean();
+
+    if (!order) throw new apiError(404, "Order not found");
+
+    // ── Create in-app notification for buyer ──
+    const notifPayload = STATUS_NOTIFICATION_MAP[status];
+    const productTitle = order.productId?.productTitle || order.itemName || "your item";
+
+    if (notifPayload && order.buyerId?._id) {
+        // Fire-and-forget — don't block the response
+        Notification.create({
+            userId: order.buyerId._id,
+            type: notifPayload.type,
+            title: notifPayload.title,
+            message: notifPayload.message(productTitle),
+            category: "order",
+            priority: notifPayload.priority,
+            actionRequired: false,
+            data: {
+                orderId: order._id,
+                status,
+                productTitle,
+            },
+        }).catch((err) => console.error("[Admin] Failed to create order notification:", err));
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, { order }, "Order status updated successfully")
+    );
+});
+
 module.exports = {
     adminLogin,
     adminLogout,
@@ -344,4 +473,9 @@ module.exports = {
     getAdminProducts,
     getAdminOrders,
     getEnvironmentStats,
+    updateUserStatus,
+    updateUserRole,
+    deleteUser,
+    deleteProduct,
+    updateOrderStatus,
 };

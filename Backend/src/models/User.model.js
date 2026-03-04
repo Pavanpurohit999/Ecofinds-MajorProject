@@ -61,6 +61,10 @@ const UserSchema = new mongoose.Schema(
         type: Boolean,
         default: false
     },
+    isSuspended: {
+        type: Boolean,
+        default: false,
+    },
     rating: {
       type: Number,
       default: 0,

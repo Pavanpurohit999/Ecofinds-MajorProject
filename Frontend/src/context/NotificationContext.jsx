@@ -28,15 +28,16 @@ export const NotificationProvider = ({ children }) => {
         try {
             setLoading(true);
             // Fetch summary for unread count
-            const summary = await notificationService.getNotificationSummary();
-            setUnreadCount(summary.unreadCount || 0);
+            const summaryRes = await notificationService.getNotificationSummary();
+            if (summaryRes?.data?.summary) {
+                setUnreadCount(summaryRes.data.summary.unreadCount || 0);
+            }
 
             // Fetch recent notifications
-            const data = await notificationService.getUserNotifications(1, 10);
-            // The API might return { notifications: [...], pagination: {...} } or just the array.
-            // Assuming typical pagination structure:
-            const notifs = data.notifications || data;
-            setNotifications(Array.isArray(notifs) ? notifs : []);
+            const notifsRes = await notificationService.getUserNotifications(1, 10);
+            if (notifsRes?.data?.notifications) {
+                setNotifications(notifsRes.data.notifications);
+            }
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         } finally {
@@ -116,6 +117,16 @@ export const NotificationProvider = ({ children }) => {
         }
     };
 
+    const deleteAllNotifications = async () => {
+        try {
+            await notificationService.deleteAllNotifications();
+            setNotifications([]);
+            setUnreadCount(0);
+        } catch (error) {
+            console.error('Failed to delete all notifications:', error);
+        }
+    };
+
     const value = {
         notifications,
         unreadCount,
@@ -123,7 +134,8 @@ export const NotificationProvider = ({ children }) => {
         fetchNotifications,
         markAsRead,
         markAllAsRead,
-        deleteNotification
+        deleteNotification,
+        deleteAllNotifications
     };
 
     return (

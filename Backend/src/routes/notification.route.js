@@ -7,7 +7,8 @@ const {
     deleteNotification,
     getNotificationSummary,
     createNotification,
-    getNotificationsByType
+    getNotificationsByType,
+    deleteAllNotifications
 } = require('../controllers/notification.controller');
 const auth = require('../middlewares/auth.middleware');
 
@@ -20,6 +21,7 @@ router.get('/summary', getNotificationSummary);                 // Get notificat
 router.get('/type/:type', getNotificationsByType);              // Get notifications by specific type
 router.put('/:notificationId/read', markNotificationAsRead);    // Mark specific notification as read
 router.put('/mark-all-read', markAllNotificationsAsRead);       // Mark all notifications as read
+router.delete('/delete-all', deleteAllNotifications);          // Delete all notifications
 router.delete('/:notificationId', deleteNotification);          // Delete a notification
 router.post('/create', createNotification);                     // Create notification (admin/system use)
 

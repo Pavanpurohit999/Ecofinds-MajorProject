@@ -9,6 +9,7 @@ import ListingsPage from "./ListingsPage";
 import OrdersReceivedPage from "./OrdersReceivedPage";
 import OrdersPlacedPage from "./OrdersPlacedPage";
 import NotificationsPage from "./NotificationsPage";
+import WishlistPage from "./WishlistPage";
 
 import { useAuth } from "../../context/AuthContext";
 import RecommendedForYouSection from "../../components/landing/RecommendationForYou";
@@ -53,6 +54,7 @@ const DashboardLayout = () => {
               <Route path="orders-received" element={<OrdersReceivedPage />} />
               <Route path="orders-placed" element={<OrdersPlacedPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="wishlist" element={<WishlistPage />} />
             </Routes>
 
             {/* Recommended for you – uses user._id */}

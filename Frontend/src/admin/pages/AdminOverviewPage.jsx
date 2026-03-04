@@ -1,38 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import {
-    FiUsers,
-    FiPackage,
-    FiShoppingCart,
-    FiDollarSign,
-    FiTrendingUp,
-    FiUserPlus,
-    FiInbox,
-    FiActivity
+    FiUsers, FiPackage, FiShoppingCart, FiDollarSign,
+    FiTrendingUp, FiUserPlus, FiInbox, FiActivity
 } from "react-icons/fi";
 
-const StatCard = ({ icon, label, value, sub, color, trend }) => (
-    <div className="bg-white rounded-3xl p-7 flex flex-col gap-4 transition-all hover:scale-[1.02] hover:shadow-xl border border-slate-100 shadow-sm">
-        <div className="flex items-center justify-between">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner`}
-                style={{ backgroundColor: `${color}15`, color: color }}>
-                {icon}
-            </div>
-            {trend && (
-                <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                    <FiTrendingUp size={12} /> {trend}
+const STAT_COLORS = [
+    { bg: "#eef2ff", icon: "#6366f1", border: "#e0e7ff" }, // indigo — users
+    { bg: "#fff7ed", icon: "#f97316", border: "#ffedd5" }, // orange — products
+    { bg: "#f5f3ff", icon: "#8b5cf6", border: "#ede9fe" }, // violet — orders
+    { bg: "#ecfdf5", icon: "#10b981", border: "#d1fae5" }, // emerald — revenue (kept green for money)
+];
+
+const StatCard = ({ icon, label, value, sub, colorIdx = 0 }) => {
+    const c = STAT_COLORS[colorIdx];
+    return (
+        <div className="bg-white rounded-2xl p-6 flex flex-col gap-4 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                    style={{ backgroundColor: c.bg, color: c.icon, border: `1px solid ${c.border}` }}>
+                    {icon}
                 </div>
-            )}
-        </div>
-        <div>
-            <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-black text-slate-800 tracking-tight">{value ?? "—"}</span>
             </div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">{label}</p>
-            {sub && <p className="text-[11px] text-slate-400 font-medium mt-1 italic">{sub}</p>}
+            <div>
+                <p className="text-2xl font-black text-slate-800 tracking-tight">{value ?? "—"}</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">{label}</p>
+                {sub && <p className="text-[11px] text-slate-400 font-medium mt-1">{sub}</p>}
+            </div>
         </div>
-    </div>
-);
+    );
+};
+
+const STATUS_COLORS = {
+    completed: "#10b981", delivered: "#10b981", Delivered: "#10b981", Completed: "#10b981",
+    pending: "#f59e0b", Pending: "#f59e0b",
+    cancelled: "#ef4444", Cancelled: "#ef4444",
+    processing: "#3b82f6", Processing: "#3b82f6",
+    confirmed: "#6366f1", Confirmed: "#6366f1",
+    shipped: "#8b5cf6", Shipped: "#8b5cf6",
+};
 
 export default function AdminOverviewPage() {
     const { adminFetch } = useAdminAuth();
@@ -49,102 +55,102 @@ export default function AdminOverviewPage() {
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin shadow-lg" />
-            <p className="text-slate-500 font-bold text-sm animate-pulse tracking-widest uppercase">Initializing Dashboard...</p>
+            <div className="w-10 h-10 border-[3px] border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <p className="text-slate-400 font-bold text-xs animate-pulse tracking-widest uppercase">Loading dashboard...</p>
         </div>
     );
 
     if (error) return (
-        <div className="p-8 bg-red-50 border border-red-100 rounded-3xl text-red-600 flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center text-2xl">⚠️</div>
-            <div>
-                <h3 className="font-bold">System Error</h3>
-                <p className="text-sm opacity-80">{error}</p>
-            </div>
+        <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-600 flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-lg">⚠</div>
+            <div><h3 className="font-bold text-sm">Error</h3><p className="text-sm opacity-80">{error}</p></div>
         </div>
     );
 
     const formatINR = (n) => n?.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }) ?? "₹0";
 
+    const maxGrowth = stats?.userGrowth?.length > 0 ? Math.max(...stats.userGrowth.map(x => x.count)) : 1;
+
     return (
-        <div className="space-y-10">
-            {/* Page Title & Intro */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Statistics</h1>
-                    <p className="text-slate-500 font-medium mt-1">Showing real-time platform metrics and ecosystem health.</p>
-                </div>
-                <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Live Engine Active</span>
-                </div>
+        <div className="space-y-8">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Dashboard Overview</h1>
+                <p className="text-slate-400 text-sm mt-1 font-medium">Real-time platform metrics and analytics.</p>
             </div>
 
-            {/* Main Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={<FiUsers />} label="Collective Users" value={stats?.totalUsers?.toLocaleString()} sub="Verified accounts on platform" color="#10b981" />
-                <StatCard icon={<FiPackage />} label="Market Listings" value={stats?.totalProducts?.toLocaleString()} sub="Active item inventory" color="#f59e0b" />
-                <StatCard icon={<FiShoppingCart />} label="Completed Orders" value={stats?.totalOrders?.toLocaleString()} sub="Successful transactions" color="#8b5cf6" />
-                <StatCard icon={<FiDollarSign />} label="Net Revenue" value={formatINR(stats?.totalRevenue)} sub="Gross platform volume" color="#06b6d4" />
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard colorIdx={0} icon={<FiUsers />} label="Total Users" value={stats?.totalUsers?.toLocaleString()} sub="Registered accounts" />
+                <StatCard colorIdx={1} icon={<FiPackage />} label="Listings" value={stats?.totalProducts?.toLocaleString()} sub="Active inventory" />
+                <StatCard colorIdx={2} icon={<FiShoppingCart />} label="Orders" value={stats?.totalOrders?.toLocaleString()} sub="All time transactions" />
+                <StatCard colorIdx={3} icon={<FiDollarSign />} label="Revenue" value={formatINR(stats?.totalRevenue)} sub="Completed orders" />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Status Visualization */}
-                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                            <FiActivity size={20} />
+            {/* Middle row: Order breakdown + Recent users */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Order Status Breakdown */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                    <div className="flex items-center gap-2.5 mb-6">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <FiActivity size={16} />
                         </div>
-                        <h2 className="text-xl font-bold text-slate-800 tracking-tight">Transaction Lifecycle</h2>
+                        <div>
+                            <h2 className="text-sm font-black text-slate-800">Order Status Breakdown</h2>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Transaction lifecycle</p>
+                        </div>
                     </div>
-
-                    <div className="space-y-6">
-                        {stats?.orderStatusBreakdown?.map((s) => (
-                            <div key={s._id} className="group">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{s._id}</span>
-                                    <span className="text-sm font-bold text-slate-800">{s.count}</span>
+                    <div className="space-y-3.5">
+                        {stats?.orderStatusBreakdown?.map((s) => {
+                            const barColor = STATUS_COLORS[s._id] || "#94a3b8";
+                            const pct = Math.min(100, (s.count / (stats?.totalOrders || 1)) * 100);
+                            return (
+                                <div key={s._id}>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <span className="text-xs font-bold text-slate-600 capitalize">{s._id}</span>
+                                        <span className="text-xs font-black text-slate-800">{s.count}</span>
+                                    </div>
+                                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div className="h-full rounded-full transition-all duration-700"
+                                            style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                                    </div>
                                 </div>
-                                <div className="h-3 rounded-full bg-slate-50 overflow-hidden border border-slate-100 shadow-inner">
-                                    <div
-                                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
-                                        style={{ width: `${Math.min(100, (s.count / (stats?.totalOrders || 1)) * 100)}%` }}
-                                    />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {(!stats?.orderStatusBreakdown || stats.orderStatusBreakdown.length === 0) && (
-                            <div className="text-center py-10">
-                                <FiInbox size={40} className="mx-auto text-slate-200 mb-2" />
-                                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">No order data synchronized</p>
+                            <div className="text-center py-8">
+                                <FiInbox size={32} className="mx-auto text-slate-200 mb-2" />
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No order data</p>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-                            <FiUserPlus size={20} />
+                {/* Recent Users */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                    <div className="flex items-center gap-2.5 mb-6">
+                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
+                            <FiUserPlus size={16} />
                         </div>
-                        <h2 className="text-xl font-bold text-slate-800 tracking-tight">Recent Onboarding</h2>
+                        <div>
+                            <h2 className="text-sm font-black text-slate-800">Recent Registrations</h2>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Last 5 users</p>
+                        </div>
                     </div>
-
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-slate-50">
                         {stats?.recentUsers?.map((u) => (
-                            <div key={u._id} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 group">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-black flex-shrink-0 shadow-md group-hover:scale-110 transition-transform"
-                                    style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+                            <div key={u._id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black flex-shrink-0"
+                                    style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}>
                                     {u.name?.[0]?.toUpperCase() || "?"}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-black text-slate-800 truncate tracking-tight">{u.name}</p>
-                                    <p className="text-[11px] text-slate-400 font-medium truncate italic">{u.email}</p>
+                                    <p className="text-sm font-bold text-slate-800 truncate">{u.name}</p>
+                                    <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
                                 </div>
-                                <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                                    {u.isSupplier && <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100">Supplier</span>}
-                                    {u.isVendor && <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md bg-amber-50 text-amber-600 border border-amber-100">Vendor</span>}
+                                <div className="flex gap-1 flex-shrink-0">
+                                    {u.isSupplier && <span className="px-2 py-0.5 text-[9px] font-black uppercase rounded bg-indigo-50 text-indigo-600 border border-indigo-100">Supplier</span>}
+                                    {u.isVendor && <span className="px-2 py-0.5 text-[9px] font-black uppercase rounded bg-amber-50 text-amber-600 border border-amber-100">Vendor</span>}
                                 </div>
                             </div>
                         ))}
@@ -152,36 +158,50 @@ export default function AdminOverviewPage() {
                 </div>
             </div>
 
-            {/* Growth Chart Visualization */}
+            {/* User Growth Chart — FIXED */}
             {stats?.userGrowth?.length > 0 && (
-                <div className="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative border border-slate-800">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-3 mb-10">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                                <FiTrendingUp size={20} />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-white tracking-tight">User Base Velocity</h2>
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Last 6 Months Metrics</p>
-                            </div>
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                    <div className="flex items-center gap-2.5 mb-6">
+                        <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+                            <FiTrendingUp size={16} />
                         </div>
+                        <div>
+                            <h2 className="text-sm font-black text-slate-800">User Growth Trend</h2>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Monthly new registrations — last 6 months</p>
+                        </div>
+                    </div>
 
-                        <div className="flex items-end gap-4 h-48">
+                    {/* Chart — fixed: use explicit pixel heights, not % */}
+                    <div className="mt-2">
+                        <div className="flex items-end gap-3" style={{ height: "180px" }}>
                             {stats.userGrowth.map((m) => {
-                                const max = Math.max(...stats.userGrowth.map((x) => x.count));
-                                const pct = max > 0 ? (m.count / max) * 100 : 5;
+                                const pxHeight = maxGrowth > 0 ? Math.max(8, Math.round((m.count / maxGrowth) * 140)) : 8;
                                 return (
-                                    <div key={m._id} className="flex-1 flex flex-col items-center gap-3 group">
-                                        <div className="relative w-full flex flex-col items-center">
-                                            <span className="text-[10px] font-black text-emerald-400 mb-2 opacity-0 group-hover:opacity-100 transition-opacity">{m.count}</span>
-                                            <div className="w-full max-w-[40px] rounded-t-xl bg-gradient-to-t from-emerald-600 to-emerald-400 transition-all duration-700 ease-out shadow-lg shadow-emerald-600/20 group-hover:from-emerald-500 group-hover:to-emerald-300"
-                                                style={{ height: `${pct}%` }} />
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">{m._id?.slice(5)}</span>
+                                    <div key={m._id} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                                        {/* Hover label */}
+                                        <span className="text-xs font-black text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            {m.count}
+                                        </span>
+                                        {/* Bar */}
+                                        <div
+                                            className="w-full max-w-[48px] rounded-t-lg transition-all duration-700 ease-out group-hover:opacity-90"
+                                            style={{
+                                                height: `${pxHeight}px`,
+                                                background: "linear-gradient(to top, #4f46e5, #818cf8)"
+                                            }}
+                                        />
+                                        {/* Month label */}
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                                            {m._id?.slice(5)}
+                                        </span>
                                     </div>
                                 );
                             })}
+                        </div>
+                        {/* Y-axis labels */}
+                        <div className="border-t border-slate-100 mt-1 pt-1 flex items-center justify-between">
+                            <span className="text-[10px] text-slate-300 font-bold">0</span>
+                            <span className="text-[10px] text-slate-300 font-bold">Max: {maxGrowth}</span>
                         </div>
                     </div>
                 </div>

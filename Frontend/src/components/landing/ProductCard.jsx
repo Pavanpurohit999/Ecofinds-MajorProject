@@ -4,14 +4,16 @@ import {
   TagIcon,
   MapPinIcon,
   CalendarIcon,
+  HeartIcon as HeartOutline,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import PlaceholderImage from "../common/PlaceholderImage";
+import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 /**
  * ProductCard — Vite-safe + normalized image handling
- * - Uses import.meta.env.VITE_API_BASE_URL (with local default)
- * - Normalizes many DB image shapes including `image` (string)
- * - Preloads image, sets imgSrc for the <img> element, and falls back on error
  */
 
 // Vite: use import.meta.env.VITE_API_BASE_URL, fallback to localhost for dev
@@ -23,6 +25,9 @@ const ProductCard = ({ product, onViewDetails }) => {
   const [imageStatus, setImageStatus] = useState("pending"); // pending | loaded | failed
   const [lastTestedSrc, setLastTestedSrc] = useState(null);
   const [imgSrc, setImgSrc] = useState(null);
+
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
 
   // destructure safely
   const {
@@ -40,16 +45,41 @@ const ProductCard = ({ product, onViewDetails }) => {
     imageDetails,
     imageUrls,
     imageUrl,
-    image, // <-- important: many DBs return `image`
-    images,
+    image,
     photo,
     soldCount,
     viewCount,
+    likesCount: initialLikesCount,
   } = product || {};
 
-  useEffect(() => {
-    console.info("ProductCard render - product:", product);
-  }, [product]);
+  const [localLikesCount, setLocalLikesCount] = useState(initialLikesCount || 0);
+
+  const productId = _id || id;
+  const isWishlisted = isInWishlist(productId);
+
+  const handleToggleWishlist = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+
+    const res = await toggleWishlist(productId);
+    if (res.success) {
+      setLocalLikesCount(prev => res.isWishlisted ? prev + 1 : Math.max(0, prev - 1));
+      toast.success(res.isWishlisted ? "Added to wishlist" : "Removed from wishlist");
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  // 1. Define fallbacks and normalization logic first
+  const fallbackPlaceholder = useMemo(() => {
+    const seed = (productCategory || "product")
+      .replace(/\s+/g, "_")
+      .toLowerCase();
+    return `https://picsum.photos/seed/${seed}_fallback/800/600`;
+  }, [productCategory]);
 
   // Normalize a single candidate (string or object) to a usable URL or null
   const normalizeSingle = (candidate) => {
@@ -80,7 +110,7 @@ const ProductCard = ({ product, onViewDetails }) => {
     return null;
   };
 
-  // Choose best image from all known shapes (including `image` string)
+  // Choose best image from all known shapes
   const normalizeImageSrc = () => {
     // 1. imageDetails array (preferred primary)
     if (Array.isArray(imageDetails) && imageDetails.length) {
@@ -113,15 +143,16 @@ const ProductCard = ({ product, onViewDetails }) => {
       if (s) return s;
     }
 
-    // 4. direct 'image' field (string) — your logs show images there
+    // 4. direct 'image' field (string)
     if (image) {
       const s = normalizeSingle(image);
       if (s) return s;
     }
 
-    // 5. generic images array (common)
-    if (Array.isArray(images) && images.length) {
-      for (const it of images) {
+    // 5. generic images array (common) - safe access
+    const productImages = product?.images || [];
+    if (Array.isArray(productImages) && productImages.length) {
+      for (const it of productImages) {
         const s = normalizeSingle(it);
         if (s) return s;
       }
@@ -143,21 +174,14 @@ const ProductCard = ({ product, onViewDetails }) => {
       imageUrls,
       imageUrl,
       image,
-      images,
+      product?.images,
       photo,
       product?.id,
       product?._id,
     ],
   );
 
-  const fallbackPlaceholder = useMemo(() => {
-    const seed = (productCategory || "product")
-      .replace(/\s+/g, "_")
-      .toLowerCase();
-    return `https://picsum.photos/seed/${seed}_fallback/800/600`;
-  }, [productCategory]);
-
-  // Preload and set imgSrc accordingly
+  // 2. Preload and set imgSrc accordingly
   useEffect(() => {
     setImageStatus("pending");
     const srcToTest = primaryImage || fallbackPlaceholder;
@@ -166,35 +190,25 @@ const ProductCard = ({ product, onViewDetails }) => {
     if (!srcToTest) {
       setImageStatus("failed");
       setImgSrc(fallbackPlaceholder);
-      console.warn(
-        "[ProductCard] no image src available for product:",
-        product?.id ?? product?._id,
-      );
       return;
     }
-
-    console.log("[ProductCard] testing image src:", srcToTest);
 
     let mounted = true;
     const img = new Image();
     try {
       img.crossOrigin = "anonymous";
-    } catch (err) {
-      // ignore if not supported
-    }
+    } catch (err) { }
 
     img.onload = () => {
       if (!mounted) return;
       setImageStatus("loaded");
       setImgSrc(srcToTest);
-      console.log("[ProductCard] image loaded OK:", srcToTest);
     };
 
-    img.onerror = (err) => {
+    img.onerror = () => {
       if (!mounted) return;
       setImageStatus("failed");
       setImgSrc(fallbackPlaceholder);
-      console.warn("[ProductCard] image failed to load:", srcToTest, err);
     };
 
     img.src = srcToTest;
@@ -205,6 +219,10 @@ const ProductCard = ({ product, onViewDetails }) => {
       img.onerror = null;
     };
   }, [primaryImage, fallbackPlaceholder, product?.id, product?._id]);
+
+  useEffect(() => {
+    console.info("ProductCard render - product:", product);
+  }, [product]);
 
   const titleText =
     productTitle || title || product?.name || "Untitled product";
@@ -286,10 +304,10 @@ const ProductCard = ({ product, onViewDetails }) => {
         <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
           <span
             className={`text-xs font-semibold px-2 py-1 rounded-full ${imageStatus === "loaded"
-                ? "bg-green-600 text-white"
-                : imageStatus === "pending"
-                  ? "bg-yellow-500 text-white"
-                  : "bg-red-600 text-white"
+              ? "bg-green-600 text-white"
+              : imageStatus === "pending"
+                ? "bg-yellow-500 text-white"
+                : "bg-red-600 text-white"
               }`}
           >
             {imageStatus === "loaded"
@@ -300,11 +318,28 @@ const ProductCard = ({ product, onViewDetails }) => {
           </span>
         </div>
 
-        {/* QUICK VIEW */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+        {/* ACTIONS (TOP RIGHT) */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+          {/* Wishlist Button */}
+          <button
+            onClick={handleToggleWishlist}
+            className={`p-2 rounded-full backdrop-blur-sm transition-all duration-200 transform hover:scale-110 active:scale-95 ${isWishlisted
+              ? 'bg-red-50 text-red-500 shadow-md'
+              : 'bg-white/90 text-gray-400 hover:text-red-500 hover:bg-white'
+              }`}
+            title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          >
+            {isWishlisted ? (
+              <HeartSolid className="h-5 w-5 animate-pulse" />
+            ) : (
+              <HeartOutline className="h-5 w-5" />
+            )}
+          </button>
+
+          {/* Quick View Button */}
           <button
             onClick={() => onViewDetails?.(product)}
-            className="bg-white/90 backdrop-blur-sm text-[#782355] p-2 rounded-full hover:bg-white transition-colors duration-200"
+            className="bg-white/90 backdrop-blur-sm text-[#782355] p-2 rounded-full hover:bg-white transition-colors duration-200 shadow-sm"
           >
             <EyeIcon className="h-5 w-5" />
           </button>
@@ -379,10 +414,16 @@ const ProductCard = ({ product, onViewDetails }) => {
           </div>
         </div>
 
-        {(soldCount || viewCount) && (
+        {(soldCount !== undefined || viewCount !== undefined || localLikesCount !== undefined) && (
           <div className="flex items-center justify-between text-[11px] text-gray-500 mb-3">
+            <div className="flex gap-3">
+              <span>{viewCount ?? 0} views</span>
+              <span className="flex items-center gap-1">
+                <HeartSolid className={`h-3 w-3 ${localLikesCount > 0 ? 'text-red-500' : 'text-gray-400'}`} />
+                {localLikesCount ?? 0}
+              </span>
+            </div>
             <span>{soldCount ?? 0} sold</span>
-            <span>{viewCount ?? 0} views</span>
           </div>
         )}
 
