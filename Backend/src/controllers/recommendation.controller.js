@@ -2,8 +2,8 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product.model.js");
 const Order = require("../models/Order.model.js");
-const AsyncHandler = require("../utils/AsyncHandler.js");
-const ApiError = require("../utils/ApiError.js");
+const asynchandler = require("../utils/asynchandler");
+const apiError = require("../utils/apiError");
 
 /* -------------------------
    Scoring helpers (kept from your logic)
@@ -205,17 +205,17 @@ function sanitizeProductForResponse(p) {
 /* ============================
    Controller: getSimilarProducts
    ============================ */
-exports.getSimilarProducts = AsyncHandler(async (req, res) => {
+exports.getSimilarProducts = asynchandler(async (req, res) => {
   const { productId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
-    throw new ApiError(400, "Invalid product id");
+    throw new apiError(400, "Invalid product id");
   }
 
   const baseProduct = await Product.findById(productId).lean();
 
   if (!baseProduct || !baseProduct.isActive || baseProduct.quantity <= 0) {
-    throw new ApiError(404, "Base product not found or inactive");
+    throw new apiError(404, "Base product not found or inactive");
   }
 
   const baseFilter = {
@@ -281,11 +281,11 @@ exports.getSimilarProducts = AsyncHandler(async (req, res) => {
 /* ============================
    Controller: getUserRecommendations
    ============================ */
-exports.getUserRecommendations = AsyncHandler(async (req, res) => {
+exports.getUserRecommendations = asynchandler(async (req, res) => {
   const { userId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new ApiError(400, "Invalid user id");
+    throw new apiError(400, "Invalid user id");
   }
 
   const orders = await Order.find({
@@ -448,11 +448,11 @@ exports.getUserRecommendations = AsyncHandler(async (req, res) => {
 /* ============================
    Controller: getFrequentlyBoughtTogether
    ============================ */
-exports.getFrequentlyBoughtTogether = AsyncHandler(async (req, res) => {
+exports.getFrequentlyBoughtTogether = asynchandler(async (req, res) => {
   const { productId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
-    throw new ApiError(400, "Invalid product id");
+    throw new apiError(400, "Invalid product id");
   }
 
   const pid = new mongoose.Types.ObjectId(productId);
