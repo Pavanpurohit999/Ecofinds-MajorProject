@@ -12,7 +12,7 @@ import {
 
 import { FaRecycle } from "react-icons/fa";
 const EcoCard = ({ icon, value, unit, label, sub, color }) => (
-    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col gap-5 transition-all hover:scale-[1.02] hover:shadow-xl relative overflow-hidden group">
+    <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 shadow-sm border border-slate-100 flex flex-col gap-4 sm:gap-5 transition-all hover:scale-[1.02] hover:shadow-xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none transition-transform group-hover:scale-110"
             style={{ backgroundColor: color }} />
 
@@ -51,7 +51,7 @@ export default function AdminEnvironmentPage() {
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin shadow-lg" />
+            <div className="w-10 sm:w-12 h-10 sm:h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin shadow-lg" />
             <p className="text-slate-500 font-bold text-sm animate-pulse tracking-widest uppercase">Calculating Ecosystem Impact...</p>
         </div>
     );
@@ -80,36 +80,36 @@ export default function AdminEnvironmentPage() {
             </div>
 
             {/* Inventory Sustainability Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
-                    <FiZap className="absolute top-6 right-8 text-emerald-200 group-hover:text-emerald-400 transition-colors" size={32} />
-                    <p className="text-4xl font-black text-emerald-600 tracking-tighter">{s.totalListedRefurbished?.toLocaleString() || 0}</p>
-                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-3">Refurbished Pipeline</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
+                    <FiZap className="absolute top-4 sm:top-6 right-4 sm:right-8 text-emerald-200 group-hover:text-emerald-400 transition-colors" size={32} />
+                    <p className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tighter">{s.totalListedRefurbished?.toLocaleString() || 0}</p>
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-2 sm:mt-3">Refurbished Pipeline</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Active Eco-Assets</p>
                 </div>
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
-                    <FiActivity className="absolute top-6 right-8 text-amber-200 group-hover:text-amber-400 transition-colors" size={32} />
-                    <p className="text-4xl font-black text-amber-500 tracking-tighter">{s.totalListedUsed?.toLocaleString() || 0}</p>
-                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-3">Reused Inventory</p>
+                <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
+                    <FiActivity className="absolute top-4 sm:top-6 right-4 sm:right-8 text-amber-200 group-hover:text-amber-400 transition-colors" size={32} />
+                    <p className="text-3xl sm:text-4xl font-black text-amber-500 tracking-tighter">{s.totalListedUsed?.toLocaleString() || 0}</p>
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-2 sm:mt-3">Reused Inventory</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Circular Trade Volume</p>
                 </div>
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
-                    <FiBarChart2 className="absolute top-6 right-8 text-indigo-200 group-hover:text-indigo-400 transition-colors" size={32} />
-                    <p className="text-4xl font-black text-indigo-600 tracking-tighter">{s.totalEcoListings?.toLocaleString() || 0}</p>
-                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-3">Aggregate Eco-Listings</p>
+                <div className="bg-white p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm relative group hover:shadow-md transition-shadow">
+                    <FiBarChart2 className="absolute top-4 sm:top-6 right-4 sm:right-8 text-indigo-200 group-hover:text-indigo-400 transition-colors" size={32} />
+                    <p className="text-3xl sm:text-4xl font-black text-indigo-600 tracking-tighter">{s.totalEcoListings?.toLocaleString() || 0}</p>
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-[0.15em] mt-2 sm:mt-3">Aggregate Eco-Listings</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">Platform-wide Impact</p>
                 </div>
             </div>
 
             {/* Categorical Distribution */}
             {data?.breakdown?.length > 0 && (
-                <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mt-12">
-                    <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between">
+                <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mt-8 sm:mt-12">
+                    <div className="px-5 sm:px-10 py-5 sm:py-8 border-b border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <FiBarChart2 className="text-emerald-500" size={24} />
-                            <h2 className="text-xl font-black text-slate-800 tracking-tight">System Breakdown</h2>
+                            <h2 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight">System Breakdown</h2>
                         </div>
-                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Environmental Audit Log</span>
+                        <span className="hidden sm:inline text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Environmental Audit Log</span>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -117,7 +117,7 @@ export default function AdminEnvironmentPage() {
                             <thead className="bg-slate-50/50">
                                 <tr>
                                     {["Taxonomy", "Salvage Vol", "Waste Diversion (kg)", "Carbon Neutrality (kg)", "Ecosystem Weight"].map(h => (
-                                        <th key={h} className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">{h}</th>
+                                        <th key={h} className="px-5 sm:px-10 py-4 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -126,21 +126,21 @@ export default function AdminEnvironmentPage() {
                                     const pct = s.totalWasteKgPrevented > 0 ? (b.wasteKgPrevented / s.totalWasteKgPrevented * 100) : 0;
                                     return (
                                         <tr key={b.category} className="hover:bg-slate-50/80 transition-all">
-                                            <td className="px-10 py-5">
-                                                <span className="text-sm font-black text-slate-800 tracking-tight">{b.category}</span>
+                                            <td className="px-5 sm:px-10 py-4 sm:py-5">
+                                                <span className="text-sm font-black text-slate-800 tracking-tight whitespace-nowrap">{b.category}</span>
                                             </td>
-                                            <td className="px-10 py-5">
-                                                <span className="text-sm font-bold text-slate-600">{b.itemsSaved?.toLocaleString()} units</span>
+                                            <td className="px-5 sm:px-10 py-4 sm:py-5">
+                                                <span className="text-sm font-bold text-slate-600 whitespace-nowrap">{b.itemsSaved?.toLocaleString()} units</span>
                                             </td>
-                                            <td className="px-10 py-5">
-                                                <span className="text-sm font-black text-emerald-600">{b.wasteKgPrevented?.toFixed(2)}</span>
+                                            <td className="px-5 sm:px-10 py-4 sm:py-5">
+                                                <span className="text-sm font-black text-emerald-600 whitespace-nowrap">{b.wasteKgPrevented?.toFixed(2)}</span>
                                             </td>
-                                            <td className="px-10 py-5">
-                                                <span className="text-sm font-black text-indigo-600">{b.co2KgSaved?.toFixed(2)}</span>
+                                            <td className="px-5 sm:px-10 py-4 sm:py-5">
+                                                <span className="text-sm font-black text-indigo-600 whitespace-nowrap">{b.co2KgSaved?.toFixed(2)}</span>
                                             </td>
-                                            <td className="px-10 py-5">
+                                            <td className="px-5 sm:px-10 py-4 sm:py-5">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex-1 h-2 rounded-full bg-slate-100 shadow-inner overflow-hidden min-w-[120px]">
+                                                    <div className="flex-1 h-2 rounded-full bg-slate-100 shadow-inner overflow-hidden min-w-[80px] sm:min-w-[120px]">
                                                         <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600" style={{ width: `${pct}%` }} />
                                                     </div>
                                                     <span className="text-[10px] font-black text-slate-400 w-10">{pct.toFixed(1)}%</span>

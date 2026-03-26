@@ -15,9 +15,9 @@ const STAT_COLORS = [
 const StatCard = ({ icon, label, value, sub, colorIdx = 0 }) => {
     const c = STAT_COLORS[colorIdx];
     return (
-        <div className="bg-white rounded-2xl p-6 flex flex-col gap-4 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[1.5rem] sm:rounded-2xl p-5 sm:p-6 flex flex-col gap-3 sm:gap-4 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center text-lg sm:text-xl"
                     style={{ backgroundColor: c.bg, color: c.icon, border: `1px solid ${c.border}` }}>
                     {icon}
                 </div>
@@ -127,8 +127,8 @@ export default function AdminOverviewPage() {
                 </div>
 
                 {/* Recent Users */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
-                    <div className="flex items-center gap-2.5 mb-6">
+                <div className="bg-white rounded-[1.5rem] sm:rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div className="flex items-center gap-2.5 mb-5 sm:mb-6">
                         <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
                             <FiUserPlus size={16} />
                         </div>
@@ -137,9 +137,9 @@ export default function AdminOverviewPage() {
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Last 5 users</p>
                         </div>
                     </div>
-                    <div className="divide-y divide-slate-50">
+                    <div className="divide-y divide-slate-50 overflow-x-auto min-w-full">
                         {stats?.recentUsers?.map((u) => (
-                            <div key={u._id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                            <div key={u._id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 min-w-max pr-2">
                                 <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black flex-shrink-0"
                                     style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}>
                                     {u.name?.[0]?.toUpperCase() || "?"}

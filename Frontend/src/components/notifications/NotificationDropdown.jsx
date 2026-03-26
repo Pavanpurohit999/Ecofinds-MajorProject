@@ -57,9 +57,17 @@ const NotificationDropdown = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 lg:w-96 bg-white rounded-lg shadow-xl overflow-hidden border border-gray-100 transform origin-top-right transition-all duration-200 ease-out">
-                    <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-800">Notifications</h3>
+                <>
+                    {/* Mobile Backdrop overlay */}
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-40 sm:hidden" 
+                        onClick={() => setIsOpen(false)}
+                    />
+                    
+                    {/* Dropdown container */}
+                    <div className="fixed sm:absolute inset-x-4 top-20 sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 lg:w-96 bg-white rounded-xl sm:rounded-lg shadow-2xl sm:shadow-xl overflow-hidden border border-gray-100 transform origin-top sm:origin-top-right transition-all duration-200 ease-out z-50">
+                        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-100">
+                            <h3 className="text-sm font-semibold text-gray-800">Notifications</h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={markAllAsRead}
@@ -117,6 +125,7 @@ const NotificationDropdown = () => {
                         </button>
                     </div>
                 </div>
+                </>
             )}
         </div>
     );
