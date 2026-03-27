@@ -102,8 +102,8 @@ app.use(express.static("public")); // This is a built-in middleware function in 
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 150000 * 60 * 1000, // 15 minutes
-  max: 1000000, // limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: {
     success: false,
     message: "Too many requests from this IP, please try again later.",
@@ -111,8 +111,8 @@ const limiter = rateLimit({
 });
 
 const messageLimiter = rateLimit({
-  windowMs: 15000 * 60 * 1000, // 1 minute
-  max: 1330, // limit each IP to 30 message requests per minute
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // limit each IP to 30 message requests per minute
   message: {
     success: false,
     message: "Too many message requests, please slow down.",
