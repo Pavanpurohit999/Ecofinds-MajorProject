@@ -14,7 +14,7 @@ console.log("🔧 Using Local Server:", USE_LOCAL_SERVER);
 // Create axios instance
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000, // 30 seconds timeout (increased for file uploads)
+  timeout: 60000, // 60 seconds (increased for production/slow cloud connections)
   headers: {
     "Content-Type": "application/json",
     // Disable caching in development

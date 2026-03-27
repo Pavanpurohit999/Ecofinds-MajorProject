@@ -58,63 +58,69 @@ const sendEmailVerificationOTP = asynchandler(async (req, res) => {
     }
   }
 
-  // Generate OTP
-  const otp = generateOTP();
-  const otpExpiry = generateOTPExpiry();
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiry = generateOTPExpiry();
 
-  try {
-    // Send email
-    console.log("Attempting to send OTP email to:", email);
-    await sendSignupOTP(email, otp, username);
-    console.log("Email sent successfully");
+    try {
+      // 1. CLEANUP PREVIOUS ATTEMPTS
+      console.log(`[AUTH] Cleaning up existing temp records for: ${email}`);
+      const cleanupStart = Date.now();
+      await User.deleteMany({
+        email,
+        isEmailVerified: false,
+      });
+      console.log(`[AUTH] Cleanup completed in ${Date.now() - cleanupStart}ms`);
 
-    // Store OTP in memory/cache or simple temporary storage
-    // For now, we'll create a temporary record that will be cleaned up
-    // Delete any existing temp records for this email
-    await User.deleteMany({
-      email,
-      $or: [
-        { username: { $regex: /^temp_/ } },
-        { password: { $regex: /^temp_password_/ } },
-      ],
-    });
-
-    // Create minimal temporary record just for OTP storage
-    const timestamp = Date.now();
-    const tempUsername = `temp_verification_${timestamp}`;
-
-    await User.create({
-      name: "Temp Verification",
-      email,
-      username: tempUsername,
-      fullname: "Temp Verification",
-      phone: `temp_${timestamp}`,
-      password: `temp_password_${timestamp}`,
-      address: {
-        street: "Temporary",
-        city: "Temporary",
-        state: "Temporary",
-        pincode: "000000",
-        geolocation: { lat: 0.0, lng: 0.0 },
-      },
-      emailVerificationOTP: otp,
-      emailVerificationOTPExpiry: otpExpiry,
-      emailVerificationOTPLastSent: new Date(),
-      isEmailVerified: false,
-    });
-
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(200, "OTP sent successfully to your email", { email })
+      // 2. SEND EMAIL
+      console.log(`[AUTH] Attempting to send OTP email to: ${email}`);
+      const emailStart = Date.now();
+      await sendSignupOTP(email, otp, username);
+      console.log(
+        `[AUTH] Email sent successfully in ${Date.now() - emailStart}ms`
       );
-  } catch (error) {
-    console.error("Error in sendEmailVerificationOTP:", error);
-    throw new apiError(
-      500,
-      `Failed to send verification email: ${error.message}`
-    );
-  }
+
+      // 3. CREATE TEMP RECORD
+      console.log(`[AUTH] Creating temporary record for: ${email}`);
+      const createStart = Date.now();
+      const timestamp = Date.now();
+      const tempUsername = `temp_verification_${timestamp}`;
+
+      await User.create({
+        name: "Temp Verification",
+        email,
+        username: tempUsername,
+        fullname: "Temp Verification",
+        phone: `temp_${timestamp}`,
+        password: `temp_password_${timestamp}`,
+        address: {
+          street: "Temporary",
+          city: "Temporary",
+          state: "Temporary",
+          pincode: "000000",
+          geolocation: { lat: 0.0, lng: 0.0 },
+        },
+        emailVerificationOTP: otp,
+        emailVerificationOTPExpiry: otpExpiry,
+        emailVerificationOTPLastSent: new Date(),
+        isEmailVerified: false,
+      });
+      console.log(
+        `[AUTH] Temp record created in ${Date.now() - createStart}ms`
+      );
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, "OTP sent successfully to your email", { email })
+        );
+    } catch (error) {
+      console.error("[AUTH] Error in sendEmailVerificationOTP:", error);
+      throw new apiError(
+        500,
+        `Verification failed: ${error.message || "Internal Server Error"}`
+      );
+    }
 });
 
 // Verify email OTP and automatically register user

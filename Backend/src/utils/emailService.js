@@ -16,15 +16,9 @@ const createTransporter = () => {
     },
   };
 
-  console.log("Creating transporter with config:", {
-    service: config.service,
-    host: config.host,
-    port: config.port,
-    user: config.auth.user,
-    passSet: !!config.auth.pass,
-  });
-
-  return nodemailer.createTransport(config);
+  console.log(`[EMAIL] Creating transporter with config. Auth user: ${config.auth.user}`);
+  const transporter = nodemailer.createTransport(config);
+  return transporter;
 };
 
 /**
@@ -45,7 +39,9 @@ const sendSignupOTP = async (email, otp, username = "User") => {
 
     const transporter = createTransporter();
 
-    console.log("Transporter created successfully");
+    console.log("[EMAIL] Transporter created. Verifying connection...");
+    await transporter.verify();
+    console.log("[EMAIL] Transporter verified successfully");
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -95,7 +91,7 @@ const sendSignupOTP = async (email, otp, username = "User") => {
     console.log("Sending to:", email);
 
     const result = await transporter.sendMail(mailOptions);
-    console.log("Signup OTP email sent successfully:", result.messageId);
+    console.log(`[EMAIL] Signup OTP email sent successfully. ID: ${result.messageId}`);
     return result;
   } catch (error) {
     console.error("Email send error details:", {
